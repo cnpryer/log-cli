@@ -18,14 +18,14 @@ fn main() {
                 .alias("date-range")
                 .required(false),
         )
-        .arg(arg!(--function <VALUE>).required(false));
+        .arg(arg!(--keyword <VALUE>).required(false));
     let matches = app.get_matches();
 
     // Parse options from values passed.
     let line_range = utils::string_to_line_range_array(matches.get_one::<String>("line_range"));
     let date_range = utils::string_to_date_range_array(matches.get_one::<String>("date_range"));
-    let function = utils::string_to_function_string(matches.get_one::<String>("function"));
-    let parser_options = ParserOptions::new(line_range, date_range, function);
+    let keyword = utils::string_to_keyword_string(matches.get_one::<String>("keyword"));
+    let parser_options = ParserOptions::new(line_range, date_range, keyword);
 
     // Set target file and parsing configuration.
     let filepath = utils::string_to_filepath_string(

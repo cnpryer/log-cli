@@ -11,20 +11,20 @@ pub struct ParserOptions {
     line_range: Option<[u32; 2]>,
     /// Date range to parse. Given as a double-colon-delimited string ("2022-01-01 08:00::2022-01-02 08:00").
     date_range: Option<[String; 2]>,
-    /// Function to parse for. Given as a string ("my_function()").
-    function: Option<String>,
+    /// Keyword to parse for. Given as a string ("my_function()").
+    keyword: Option<String>,
 }
 
 impl ParserOptions {
     pub fn new(
         line_range: Option<[u32; 2]>,
         date_range: Option<[String; 2]>,
-        function: Option<String>,
+        keyword: Option<String>,
     ) -> ParserOptions {
         ParserOptions {
             line_range,
             date_range,
-            function,
+            keyword,
         }
     }
 }
