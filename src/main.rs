@@ -4,7 +4,7 @@ use log_cli::parser::{utils, Parser, ParserConfig, ParserOptions};
 fn main() {
     // Create clap app.
     let app = Command::new("log-cli")
-        .version("0.0.0")
+        .version("0.0.1-alpha.0")
         .author("Chris Pryer <cnpryer@gmail.com>")
         .about("Command line interface for log files.")
         .arg(arg!([filepath]))
