@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      - id: fmt
+        name: fmt
+        description: Check fmt.
+        entry: cargo fmt
+        language: system
+        types: [rust]
+        files: Cargo\.toml|\.rs$
+        pass_filenames: false
+        args: ["--all", "--", "--check"]
+      - id: test
+        name: cargo test
+        description: Run tests.
+        entry: cargo test
+        language: system
+        types: [rust]
+        files: Cargo\.toml|\.rs$
+        pass_filenames: false
+        args: ["--all-features"]
+      - id: clippy
+        name: clippy
+        description: Run lints.
+        entry: cargo clippy
+        language: system
+        types: [rust]
+        files: Cargo\.toml|\.rs$
+        pass_filenames: false
+        args: ["--all-features", "--", "-D", "warnings"]
