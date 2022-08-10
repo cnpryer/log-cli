@@ -27,12 +27,13 @@ pub fn string_to_date_range_array(string: Option<&String>) -> Option<[String; 2]
     Some([parts[0].clone(), parts[1].clone()])
 }
 
-/// Parse function string from string.
+/// Parse keyword string from string.
 // TODO:
 // - Use Result.
 // - Validation.
 // - Less object redundancy.
-pub fn string_to_function_string(string: Option<&String>) -> Option<String> {
+// - string_to_keywords_vector (could start thinking of vectors for other configuration).
+pub fn string_to_keyword_string(string: Option<&String>) -> Option<String> {
     string?;
 
     // TODO
@@ -79,13 +80,13 @@ mod tests {
     }
 
     #[test]
-    fn test_string_to_function_string() {
+    fn test_string_to_keyword_string() {
         let string = "my_function()".to_string();
         let expected = "my_function()".to_string();
-        let res = string_to_function_string(Some(&string)).unwrap();
+        let res = string_to_keyword_string(Some(&string)).unwrap();
 
         assert_eq!(res, expected);
-        assert_eq!(string_to_function_string(None), None);
+        assert_eq!(string_to_keyword_string(None), None);
     }
 
     #[test]
