@@ -1,0 +1,21 @@
+[package]
+name = "log-cli"
+version = "0.0.0"
+edition = "2021"
+authors = ["cnpryer <cnpryer@gmail.com>"]
+license = "MIT"
+description = "Command line interface for log files."
+repository = "https://github.com/cnpryer/log-cli.git"
+homepage = "https://github.com/cnpryer/log-cli.git"
+readme = "README.md"
+keywords = [
+    "cli",
+    "log",
+    "parser"
+]
+categories = [
+    "command-line-interface",
+    "development-tools"
+]
+
+[dependencies]
