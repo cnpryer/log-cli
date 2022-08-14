@@ -40,32 +40,32 @@ fn cli() -> App<'static> {
         .propagate_version(true)
         .author("Chris Pryer <cnpryer@gmail.com>")
         .about("Command line interface for log files.")
-        // Path to log file to be read. By default if no additional flags are passed the entire file will be displayed.
-        .arg(arg!([LOG_FILE]).value_parser(value_parser!(PathBuf)))
-        // Keywords to search for in the log file. Multiple keywords can be passed (these are all keywords).
+        .arg(arg!([LOG_FILE]).value_parser(value_parser!(PathBuf))
+        .help("Path to log file to be read. By default if no additional flags are passed the entire file will be displayed."))
         .arg(
             arg!(--keywords <VALUE>)
                 .required(false)
                 .multiple_values(true)
-                .min_values(1),
+                .min_values(1)
+                .help("Keywords to search for in the log file. Multiple keywords can be passed (ex: these are all keywords)."),
         )
-        // Line number range to display. Must be a valid integer range format (0 10 to display the first 10 lines).
         .arg(
             arg!(--"line-range" <VALUE>)
                 .required(false)
                 .value_parser(validate::valid_line_range_value)
                 .multiple_values(true)
                 .min_values(1)
-                .max_values(2),
+                .max_values(2)
+                .help("Line number range to display. Must be a valid integer range format (ex: 0 10 to display the first 10 lines)."),
         )
-        // Date range to display. Must be a valid date range format ("2022-01-01" "2022-01-02").
         .arg(
             arg!(--"date-range" <VALUE>)
                 .required(false)
                 .value_parser(validate::valid_date_range_value)
                 .multiple_values(true)
                 .min_values(1)
-                .max_values(2),
+                .max_values(2)
+                .help("Date range to display. Must be a valid date range format (ex:\"2022-01-01\" \"2022-01-02\")."),
         );
 
     app
