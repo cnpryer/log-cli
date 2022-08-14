@@ -9,7 +9,7 @@ This project is currently under development.
 ## Usage
 
 ```console
-log-cli sample.log
+> log-cli sample.log
 
 ln0 2022-01-01 07:00:00,0 [info] module1  Message Subject: Text for a message.
 ln1 2022-01-01 08:00:00,0 [info] module1  Message Subject: Text for a message.
@@ -40,7 +40,7 @@ ln23 2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
 ### View using keywords
 
 ```console
-log-cli sample.log --keywords "[debug]" "[warning]"
+> log-cli sample.log --keywords "[debug]" "[warning]"
 
 ln2 2022-01-01 09:00:00,0 [debug] module2  Message Subject: Text for a message.
 ln3 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
@@ -54,10 +54,36 @@ ln21 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a messa
 ### View using a line range
 
 ```console
-log-cli sample.log --line-range 20 30"
+> log-cli sample.log --line-range 20 30
 
 ln20 2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
 ln21 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
 ln22 2022-01-02 05:00:00,0 [info] module7  Message Subject: Text for a message.
 ln23 2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
+```
+
+### More usage
+
+```console
+> log-cli --help
+
+Command line interface for log files.
+
+USAGE:
+    log-cli [OPTIONS] [--] [LOG_FILE]
+
+ARGS:
+    <LOG_FILE>    Path to log file to be read. By default if no additional flags are passed the
+                  entire file will be displayed.
+
+OPTIONS:
+ (TODO) --date-range <VALUE>...    Date range to display. Must be a valid date range format
+                                   (ex:"2022-01-01" "2022-01-02").
+    -h, --help                     Print help information
+        --head <VALUE>             Display the top VALUE lines.
+        --keywords <VALUE>...      Keywords to search for in the log file. Multiple keywords can be
+                                   passed (ex: these are all keywords).
+        --line-range <VALUE>...    Line number range to display. Must be a valid integer range
+                                   format (ex: 0 10 to display the first 10 lines).
+    -V, --version                  Print version information
 ```

@@ -14,7 +14,6 @@ pub struct Viewer {
 }
 
 impl Viewer {
-    // TODO: Certain parameters cannot be used together.
     pub fn new(
         keywords: Option<ValuesRef<'_, String>>,
         line_range: Option<ValuesRef<'_, usize>>,

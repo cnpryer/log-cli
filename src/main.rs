@@ -45,7 +45,7 @@ fn main() {
         .get_one::<PathBuf>("LOG_FILE")
         .expect("A valid path to a log file is required.");
 
-    // Read and display log file.
+    // Read the file to a buffer and build a viewer for view operations.
     let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
     let viewer = Viewer::new(keywords, line_range, date_range, head);
 
