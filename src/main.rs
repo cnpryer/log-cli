@@ -36,7 +36,7 @@ fn main() {
 
 fn cli() -> App<'static> {
     let app = Command::new("log-cli")
-        .version("0.0.1-alpha.0")
+        .version("0.0.1-alpha.1")
         .propagate_version(true)
         .author("Chris Pryer <cnpryer@gmail.com>")
         .about("Command line interface for log files.")
