@@ -5,6 +5,7 @@ use std::{
 
 use clap::parser::ValuesRef;
 
+/// Viewer struct used to perform view operations on file buffers.
 pub struct Viewer {
     keywords: Option<Vec<String>>,
     line_range: Option<Vec<u32>>,
