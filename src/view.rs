@@ -55,29 +55,38 @@ impl Viewer {
         }
     }
 
-    /// Display all lines within line range (inclusive).
-    fn display_with_lines(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
+    /// Filter an iterator of String lines for line numbers selected by the line range.
+    fn filter_with_line_range<I>(
+        &self,
+        iter: I,
+    ) -> Result<impl Iterator<Item = (usize, String)>, &str>
+    where
+        I: Iterator<Item = (usize, String)>,
+    {
         if self.line_range.is_none() {
             return Err("No line range found.");
         }
 
         let lr = self.line_range.as_ref().unwrap();
 
-        for (i, line) in buffer.lines().flatten().enumerate() {
-            // If line range is only one value skip ln if it's not the selected ln.
-            if lr.len() == 1 && i != lr[0] {
-                continue;
-            }
+        let res = iter
+            .filter(|(i, _)| {
+                // If line range is only one value skip ln if it's not the selected ln.
+                if lr.len() == 1 && *i != lr[0] {
+                    return false;
+                }
 
-            // If line range is two values then skip ln if it's outside the range selected.
-            if lr.len() == 2 && (i < lr[0] || i > lr[1]) {
-                continue;
-            }
+                // If line range is two values then skip ln if it's outside the range selected.
+                if lr.len() == 2 && (*i < lr[0] || *i > lr[1]) {
+                    return false;
+                }
 
-            println!("{}", line);
-        }
+                true
+            })
+            .collect::<Vec<(usize, String)>>()
+            .into_iter();
 
-        Ok(())
+        Ok(res)
     }
 
     /// Display all lines within date range (inlcusive).
@@ -92,32 +101,40 @@ impl Viewer {
         unimplemented!()
     }
 
-    /// Display all lines that contain any keyword.
-    fn display_with_keywords(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
+    /// Filter iterator of String lines for lines containing any keywords selected.
+    fn filter_with_keywords<I>(
+        &self,
+        iter: I,
+    ) -> Result<impl Iterator<Item = (usize, String)>, &str>
+    where
+        I: Iterator<Item = (usize, String)>,
+    {
         if self.keywords.is_none() {
             return Err("No keywords found.");
         }
 
         // Filter lines for lines that contain any of the keywords indicated by caller.
-        let lines = buffer.lines().flatten().filter(|ln| {
-            self.keywords
-                .clone()
-                .unwrap()
-                .iter()
-                .any(|kw| ln.contains(kw))
-        });
+        let res = iter
+            .filter(|(_, l)| {
+                self.keywords
+                    .clone()
+                    .unwrap()
+                    .iter()
+                    .any(|kw| l.contains(kw))
+            })
+            .collect::<Vec<(usize, String)>>()
+            .into_iter();
 
-        for line in lines {
-            println!("{}", line);
-        }
-
-        Ok(())
+        Ok(res)
     }
 
     /// Display the entire file.
-    fn display_all(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
-        for line in buffer.lines().flatten() {
-            println!("{}", line);
+    fn display_lines<I>(&self, iter: I) -> Result<(), &str>
+    where
+        I: Iterator<Item = (usize, String)>,
+    {
+        for (i, line) in iter {
+            println!("ln{} {}", i, line);
         }
 
         Ok(())
@@ -128,18 +145,30 @@ impl Viewer {
     //       - Use `Result`
     //       - Validation and error handling.
     pub fn display_with(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
-        if self.line_range.is_some() {
-            return self.display_with_lines(buffer);
+        match (
+            self.keywords.as_ref(),
+            self.line_range.as_ref(),
+            self.date_range.as_ref(),
+        ) {
+            (Some(_), Some(_), None) => {
+                let lines = self.filter_with_line_range(buffer.lines().flatten().enumerate())?;
+                let lines = self.filter_with_keywords(lines)?;
+                self.display_lines(lines)
+            }
+            (None, None, None) => self.display_lines(buffer.lines().flatten().enumerate()),
+            (None, None, Some(_)) => unimplemented!(),
+            (None, Some(_), None) => {
+                let lines = self.filter_with_line_range(buffer.lines().flatten().enumerate())?;
+                self.display_lines(lines)
+            }
+            (None, Some(_), Some(_)) => unreachable!(),
+            (Some(_), None, None) => {
+                let lines = self.filter_with_keywords(buffer.lines().flatten().enumerate())?;
+                self.display_lines(lines)
+            }
+            (Some(_), None, Some(_)) => unimplemented!(),
+            (Some(_), Some(_), Some(_)) => unreachable!(),
         }
-        if self.date_range.is_some() {
-            return self._display_with_dates(buffer);
-        }
-
-        if self.keywords.is_some() {
-            return self.display_with_keywords(buffer);
-        }
-
-        self.display_all(buffer)
     }
 }
 
