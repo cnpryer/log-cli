@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-/// Create a `File` `BufReader` from `PathBuf`. Throw IO Error for failure to create the buffer.
+/// Create a `File` `BufReader` from a `Path`. Otherwise throw IO Error.
 pub fn read_file<P>(path: P) -> Result<BufReader<File>>
 where
     P: AsRef<Path>,
