@@ -28,7 +28,7 @@ log-cli sample.log
 2022-01-01 21:00:00,0 [info] module2  Message Subject: Text for a message.
 2022-01-01 22:00:00,0 [info] module2  Message Subject: Text for a message.
 2022-01-01 23:00:00,0 [info] module6  Message Subject: Text for a message.
-2022-01-01 24:00:00,0 [warning] module1  Message Subject: Text for a message.
+2022-01-02 00:00:00,0 [warning] module1  Message Subject: Text for a message.
 2022-01-02 01:00:00,0 [info] module10  Message Subject: Text for a message.
 2022-01-02 02:00:00,0 [info] module1  Message Subject: Text for a message.
 2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
@@ -46,7 +46,7 @@ log-cli sample.log --keywords "[debug]" "[warning]"
 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
 2022-01-01 11:00:00,0 [debug] module2  Message Subject: Text for a message.
 2022-01-01 20:00:00,0 [debug] module5  Message Subject: Text for a message.
-2022-01-01 24:00:00,0 [warning] module1  Message Subject: Text for a message.
+2022-01-02 00:00:00,0 [warning] module1  Message Subject: Text for a message.
 2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
 ```
