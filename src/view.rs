@@ -10,6 +10,7 @@ pub struct Viewer {
     keywords: Option<Vec<String>>,
     line_range: Option<Vec<usize>>,
     date_range: Option<Vec<String>>,
+    head: Option<usize>,
 }
 
 impl Viewer {
@@ -18,40 +19,70 @@ impl Viewer {
         keywords: Option<ValuesRef<'_, String>>,
         line_range: Option<ValuesRef<'_, usize>>,
         date_range: Option<ValuesRef<'_, String>>,
+        head: Option<&usize>,
     ) -> Viewer {
-        match (keywords, line_range, date_range) {
-            (Some(kw), Some(lr), None) => Viewer {
+        match (keywords, line_range, date_range, head) {
+            (Some(kw), Some(lr), None, None) => Viewer {
                 keywords: Some(kw.into_iter().cloned().collect()),
                 line_range: Some(lr.into_iter().copied().collect()),
                 date_range: None,
+                head: None,
             },
-            (Some(kw), None, Some(dr)) => Viewer {
+            (Some(kw), None, Some(dr), None) => Viewer {
                 keywords: Some(kw.into_iter().cloned().collect()),
                 line_range: None,
                 date_range: Some(dr.into_iter().cloned().collect()),
+                head: None,
             },
-            (Some(kw), None, None) => Viewer {
+            (Some(kw), None, None, None) => Viewer {
                 keywords: Some(kw.into_iter().cloned().collect()),
                 line_range: None,
                 date_range: None,
+                head: None,
             },
-            (None, None, None) => Viewer {
+            (None, None, None, None) => Viewer {
                 keywords: None,
                 line_range: None,
                 date_range: None,
+                head: None,
             },
-            (None, None, Some(dr)) => Viewer {
+            (None, None, Some(dr), None) => Viewer {
                 keywords: None,
                 line_range: None,
                 date_range: Some(dr.into_iter().cloned().collect()),
+                head: None,
             },
-            (None, Some(lr), None) => Viewer {
+            (None, Some(lr), None, None) => Viewer {
                 keywords: None,
                 line_range: Some(lr.into_iter().copied().collect()),
                 date_range: None,
+                head: None,
             },
-            (None, Some(_), Some(_)) => unreachable!(), // Invalid
-            (Some(_), Some(_), Some(_)) => unreachable!(), // Invalid
+            (None, None, None, Some(h)) => Viewer {
+                keywords: None,
+                line_range: None,
+                date_range: None,
+                head: Some(*h),
+            },
+            (None, None, Some(dr), Some(h)) => Viewer {
+                keywords: None,
+                line_range: None,
+                date_range: Some(dr.into_iter().cloned().collect()),
+                head: Some(*h),
+            },
+            (None, Some(lr), None, Some(h)) => Viewer {
+                keywords: None,
+                line_range: Some(lr.into_iter().copied().collect()),
+                date_range: None,
+                head: Some(*h),
+            },
+            (Some(kw), None, None, Some(h)) => Viewer {
+                keywords: Some(kw.into_iter().cloned().collect()),
+                line_range: None,
+                date_range: None,
+                head: Some(*h),
+            },
+            _ => unreachable!(),
         }
     }
 
@@ -59,25 +90,26 @@ impl Viewer {
     fn filter_with_line_range<I>(
         &self,
         iter: I,
+        range: &Vec<usize>,
     ) -> Result<impl Iterator<Item = (usize, String)>, &str>
     where
         I: Iterator<Item = (usize, String)>,
     {
-        if self.line_range.is_none() {
-            return Err("No line range found.");
+        // The range given is invalid if it has more than two values.
+        // TODO: Should this be a panic?
+        if range.len() > 2 {
+            return Err("The range provided has more than two elements.");
         }
-
-        let lr = self.line_range.as_ref().unwrap();
 
         let res = iter
             .filter(|(i, _)| {
                 // If line range is only one value skip ln if it's not the selected ln.
-                if lr.len() == 1 && *i != lr[0] {
+                if range.len() == 1 && *i != range[0] {
                     return false;
                 }
 
                 // If line range is two values then skip ln if it's outside the range selected.
-                if lr.len() == 2 && (*i < lr[0] || *i > lr[1]) {
+                if range.len() == 2 && (*i < range[0] || *i > range[1]) {
                     return false;
                 }
 
@@ -105,23 +137,14 @@ impl Viewer {
     fn filter_with_keywords<I>(
         &self,
         iter: I,
+        keywords: &[String],
     ) -> Result<impl Iterator<Item = (usize, String)>, &str>
     where
         I: Iterator<Item = (usize, String)>,
     {
-        if self.keywords.is_none() {
-            return Err("No keywords found.");
-        }
-
         // Filter lines for lines that contain any of the keywords indicated by caller.
         let res = iter
-            .filter(|(_, l)| {
-                self.keywords
-                    .clone()
-                    .unwrap()
-                    .iter()
-                    .any(|kw| l.contains(kw))
-            })
+            .filter(|(_, l)| keywords.iter().any(|kw| l.contains(kw)))
             .collect::<Vec<(usize, String)>>()
             .into_iter();
 
@@ -149,25 +172,40 @@ impl Viewer {
             self.keywords.as_ref(),
             self.line_range.as_ref(),
             self.date_range.as_ref(),
+            self.head.as_ref(),
         ) {
-            (Some(_), Some(_), None) => {
-                let lines = self.filter_with_line_range(buffer.lines().flatten().enumerate())?;
-                let lines = self.filter_with_keywords(lines)?;
+            (Some(kw), Some(lr), None, None) => {
+                let lines =
+                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), lr)?;
+                let lines = self.filter_with_keywords(lines, kw)?;
                 self.display_lines(lines)
             }
-            (None, None, None) => self.display_lines(buffer.lines().flatten().enumerate()),
-            (None, None, Some(_)) => unimplemented!(),
-            (None, Some(_), None) => {
-                let lines = self.filter_with_line_range(buffer.lines().flatten().enumerate())?;
+            (None, None, None, None) => self.display_lines(buffer.lines().flatten().enumerate()),
+            (None, None, Some(_), None) => unimplemented!(),
+            (None, Some(lr), None, None) => {
+                let lines =
+                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), lr)?;
                 self.display_lines(lines)
             }
-            (None, Some(_), Some(_)) => unreachable!(),
-            (Some(_), None, None) => {
-                let lines = self.filter_with_keywords(buffer.lines().flatten().enumerate())?;
+            (Some(kw), None, None, None) => {
+                let lines = self.filter_with_keywords(buffer.lines().flatten().enumerate(), kw)?;
                 self.display_lines(lines)
             }
-            (Some(_), None, Some(_)) => unimplemented!(),
-            (Some(_), Some(_), Some(_)) => unreachable!(),
+            (Some(_), None, Some(_), None) => unimplemented!(),
+            (None, None, None, Some(h)) => {
+                let lr = vec![0, *h - 1];
+                let lines =
+                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), &lr)?;
+                self.display_lines(lines)
+            }
+            (Some(kw), None, None, Some(h)) => {
+                let lr = vec![0, *h - 1];
+                let lines =
+                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), &lr)?;
+                let lines = self.filter_with_keywords(lines, kw)?;
+                self.display_lines(lines)
+            }
+            _ => unreachable!(),
         }
     }
 }
@@ -175,7 +213,7 @@ impl Viewer {
 #[test]
 // TODO: More robust testing.
 fn test_viewer() {
-    let viewer_none = Viewer::new(None, None, None);
+    let viewer_none = Viewer::new(None, None, None, None);
 
     assert_eq!(viewer_none.line_range, None);
     assert_eq!(viewer_none.date_range, None);

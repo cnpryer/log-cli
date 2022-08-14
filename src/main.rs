@@ -15,12 +15,27 @@ fn main() {
     let keywords = matches.get_many::<String>("keywords");
     let line_range = matches.get_many::<usize>("line-range");
     let date_range = matches.get_many::<String>("date-range");
+    let head = matches.get_one::<usize>("head");
 
     // Certain arguments cannot be used together. Error if this is the case.
     if line_range.is_some() && date_range.is_some() {
         app.error(
             ErrorKind::ArgumentConflict,
             "Cannot use both line-range and date-range together.",
+        )
+        .exit();
+    }
+    if line_range.is_some() && head.is_some() {
+        app.error(
+            ErrorKind::ArgumentConflict,
+            "Cannot use both line-range and head together.",
+        )
+        .exit();
+    }
+    if date_range.is_some() && head.is_some() {
+        app.error(
+            ErrorKind::ArgumentConflict,
+            "Cannot use both date-range and head together.",
         )
         .exit();
     }
@@ -32,11 +47,11 @@ fn main() {
 
     // Read and display log file.
     let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
-    let viewer = Viewer::new(keywords, line_range, date_range);
+    let viewer = Viewer::new(keywords, line_range, date_range, head);
 
     // Attempt to display the contents otherwise print the error.
     if let Err(e) = viewer.display_with(buffer) {
-        println!("{:?}", e)
+        println!("ERROR: {:?}", e)
     }
 }
 
@@ -72,6 +87,10 @@ fn cli() -> App<'static> {
                 .min_values(1)
                 .max_values(2)
                 .help("Date range to display. Must be a valid date range format (ex:\"2022-01-01\" \"2022-01-02\")."),
+        ).arg(
+            arg!(--head <VALUE>).default_missing_value("5")
+            .required(false).value_parser(value_parser!(usize))
+            .help("Display the top VALUE lines.")
         );
 
     app
