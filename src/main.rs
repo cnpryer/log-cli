@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use clap::{arg, value_parser, App, Command, ErrorKind};
 use log_cli::{read::read_file, validate, view::Viewer};
 
+const VERSION: &str = "0.0.1-alpha.2";
+
 fn main() {
     // Create main clap command.
     let mut app = cli();
@@ -40,7 +42,7 @@ fn main() {
 
 fn cli() -> App<'static> {
     let app = Command::new("log-cli")
-        .version("0.0.1-alpha.1")
+        .version(VERSION)
         .propagate_version(true)
         .author("Chris Pryer <cnpryer@gmail.com>")
         .about("Command line interface for log files.")
