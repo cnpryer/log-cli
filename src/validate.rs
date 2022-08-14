@@ -6,11 +6,11 @@ const DATE_FORMAT: &str = "%Y-%m-%d";
 /// Validate line range argument value(s). Return vector of at most integers or error.
 /// A valid line range can be either one line number (1 for line one) or two line numbers to indicate
 /// multiple lines (0 20 to get first 20 lines).
-pub fn valid_line_range_value(value: &str) -> Result<u32, String> {
+pub fn valid_line_range_value(value: &str) -> Result<usize, String> {
     // Attempt to parse u32 values from string values.
-    let res: u32 = value
+    let res: usize = value
         .parse()
-        .map_err(|_| format!("{} must be a valid integer.", value))?;
+        .map_err(|_| format!("{} must be a valid usize.", value))?;
 
     Ok(res)
 }
@@ -53,7 +53,7 @@ fn test_line_range_validation() {
     assert_eq!(valid_line_range_value(valid_value), Ok(0));
     assert_eq!(
         valid_line_range_value(invalid_value),
-        Err(format!("{} must be a valid integer.", invalid_value))
+        Err(format!("{} must be a valid usize.", invalid_value))
     );
 }
 

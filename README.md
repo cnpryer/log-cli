@@ -50,3 +50,14 @@ log-cli sample.log --keywords "[debug]" "[warning]"
 2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
 ```
+
+### View using a line range
+
+```console
+log-cli sample.log --line-range 20 30"
+
+2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
+2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
+2022-01-02 05:00:00,0 [info] module7  Message Subject: Text for a message.
+2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
+```

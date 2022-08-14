@@ -11,7 +11,7 @@ fn main() {
 
     // Get optional argument values.
     let keywords = matches.get_many::<String>("keywords");
-    let line_range = matches.get_many::<u32>("line-range");
+    let line_range = matches.get_many::<usize>("line-range");
     let date_range = matches.get_many::<String>("date-range");
 
     // Certain arguments cannot be used together. Error if this is the case.
@@ -31,7 +31,11 @@ fn main() {
     // Read and display log file.
     let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
     let viewer = Viewer::new(keywords, line_range, date_range);
-    viewer.display_with(buffer);
+
+    // Attempt to display the contents otherwise print the error.
+    if let Err(e) = viewer.display_with(buffer) {
+        println!("{:?}", e)
+    }
 }
 
 fn cli() -> App<'static> {
