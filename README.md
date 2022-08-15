@@ -8,7 +8,7 @@ Command line interface for log files.
 
 ## Installation
 
-To install `log-cli` run
+To install `log-cli` run:
 
 ```console
 cargo install log-cli

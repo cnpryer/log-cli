@@ -1,6 +1,6 @@
 [package]
 name = "log-cli"
-version = "0.0.1-alpha.3"
+version = "0.0.1-alpha.4"
 edition = "2021"
 authors = ["cnpryer <cnpryer@gmail.com>"]
 license = "MIT"
@@ -17,6 +17,10 @@ categories = [
     "command-line-interface",
     "development-tools"
 ]
+
+[[bin]]
+name = "log-cli"
+path = "src/main.rs" # This should be the default.
 
 [dependencies]
 chrono = "^0.4.22"
