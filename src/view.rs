@@ -149,18 +149,20 @@ impl Viewer {
         unimplemented!()
     }
 
-    /// Filter iterator of String lines for lines containing any keywords selected.
+    /// Filter iterator of String lines containing keywords depending on a desired evaulation strategy (eval).
+    /// An eval can be "all" or "any".
     fn filter_with_keywords<I>(
         &self,
         iter: I,
         keywords: &[String],
+        eval: &str, // TODO: Use clap-recognizable enum
     ) -> Result<impl Iterator<Item = (usize, String)>, &str>
     where
         I: Iterator<Item = (usize, String)>,
     {
         // Filter lines for lines that contain any of the keywords indicated by caller.
         let res = iter
-            .filter(|(_, l)| keywords.iter().any(|kw| l.contains(kw)))
+            .filter(|(_, l)| vec_elements_in_string(keywords, l, eval))
             .collect::<Vec<(usize, String)>>()
             .into_iter();
 
@@ -212,7 +214,7 @@ impl Viewer {
             (Some(kw), Some(lr), None, None) => {
                 let lines =
                     self.filter_with_line_range(buffer.lines().flatten().enumerate(), lr)?;
-                let lines = self.filter_with_keywords(lines, kw)?;
+                let lines = self.filter_with_keywords(lines, kw, "all")?;
                 self.display_lines(lines)
             }
             // Nothing provided.
@@ -227,7 +229,8 @@ impl Viewer {
             }
             // Keywords.
             (Some(kw), None, None, None) => {
-                let lines = self.filter_with_keywords(buffer.lines().flatten().enumerate(), kw)?;
+                let lines =
+                    self.filter_with_keywords(buffer.lines().flatten().enumerate(), kw, "all")?;
                 self.display_lines(lines)
             }
             // Keywords and date range.
@@ -244,12 +247,26 @@ impl Viewer {
                 let lr = vec![0, *h - 1];
                 let lines =
                     self.filter_with_line_range(buffer.lines().flatten().enumerate(), &lr)?;
-                let lines = self.filter_with_keywords(lines, kw)?;
+                let lines = self.filter_with_keywords(lines, kw, "all")?;
                 self.display_lines(lines)
             }
             _ => unreachable!(),
         }
     }
+}
+
+/// Check string for "any" or "all" (eval) elements from vector. Return true of eval is met, otherwise return false.
+// TODO: Use Result.
+fn vec_elements_in_string(vec: &[String], string: &str, eval: &str) -> bool {
+    if eval == "all" {
+        return vec.iter().all(|e| string.contains(e));
+    }
+
+    if eval == "any" {
+        return vec.iter().any(|e| string.contains(e));
+    }
+
+    false
 }
 
 #[test]
@@ -269,7 +286,7 @@ fn test_viewer_keywords() {
         .enumerate();
     let keywords = vec!["foo".to_string()];
 
-    if let Ok(res) = viewer.filter_with_keywords(iter, &keywords) {
+    if let Ok(res) = viewer.filter_with_keywords(iter, &keywords, "all") {
         assert_eq!(
             res.collect::<Vec<(usize, String)>>(),
             vec![(2, "foo".to_string())]
