@@ -84,8 +84,6 @@ ARGS:
                   entire file will be displayed.
 
 OPTIONS:
- (TODO) --date-range <VALUE>...    Date range to display. Must be a valid date range format
-                                   (ex:"2022-01-01" "2022-01-02").
     -h, --help                     Print help information
         --head <VALUE>             Display the top VALUE lines.
         --keywords <VALUE>...      Keywords to search for in the log file. Multiple keywords can be
