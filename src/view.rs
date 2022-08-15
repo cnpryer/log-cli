@@ -175,12 +175,24 @@ impl Viewer {
         // TODO: Store either metadata from initial file read or store upfront after intially collecting
         //       or storing the iterator.
         let lines: Vec<(usize, String)> = iter.collect();
-        let max_ln = &lines.len() - 1;
+
+        // If no lines are collected correctly display nothing.
+        if lines.is_empty() {
+            return Ok(());
+        }
+
+        // Last line number (assumed sorted ascending) determines line number padding.
+        let last_ln = lines[lines.len() - 1].0;
 
         // Display each line numbered with padding based on the number of lines collected.
         // TODO: Could use generic binary search fn to calculate digits without conversion.
         for (i, line) in &lines {
-            println!("ln{:0width$} {}", i, line, width = max_ln.to_string().len());
+            println!(
+                "ln{:0width$} {}",
+                i,
+                line,
+                width = last_ln.to_string().len()
+            );
         }
 
         Ok(())
