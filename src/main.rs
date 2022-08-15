@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{arg, value_parser, App, Command, ErrorKind};
 use log_cli::{read::read_file, validate, view::Viewer};
 
-const VERSION: &str = "0.0.1-alpha.2";
+const VERSION: &str = "0.0.1-alpha.3";
 
 fn main() {
     // Create main clap command.
