@@ -88,6 +88,7 @@ fn cli() -> App<'static> {
         //         .min_values(1)
         //         .max_values(2)
         //         .help("Date range to display. Must be a valid date range format (ex:\"2022-01-01\" \"2022-01-02\")."),
+        //)
         .arg(
             arg!(--head <VALUE>).default_missing_value("5")
             .required(false).value_parser(value_parser!(usize))
