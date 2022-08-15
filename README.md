@@ -1,10 +1,18 @@
 [![Tests](https://github.com/cnpryer/log-cli/actions/workflows/build.yml/badge.svg)](https://github.com/cnpryer/log-cli/actions/workflows/build.yml)
+[![](https://img.shields.io/crates/v/log-cli.svg)](https://crates.io/crates/log-cli)
 
 # log-cli
 
 Command line interface for log files.
 
-This project is currently under development.
+
+## Installation
+
+To install `log-cli` run:
+
+```console
+cargo install log-cli
+```
 
 ## Usage
 
