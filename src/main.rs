@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{arg, value_parser, App, Command, ErrorKind};
 use log_cli::{read::read_file, validate, view::Viewer};
 
-const VERSION: &str = "0.0.1";
+const VERSION: &str = "0.0.2";
 
 fn main() {
     // Create main clap command.
@@ -14,7 +14,8 @@ fn main() {
     // Get optional argument values.
     let keywords = matches.get_many::<String>("keywords");
     let line_range = matches.get_many::<usize>("line-range");
-    let date_range = matches.get_many::<String>("date-range");
+    // TODO
+    let date_range = None; //matches.get_many::<String>("date-range");
     let head = matches.get_one::<usize>("head");
 
     // Certain arguments cannot be used together. Error if this is the case.
@@ -79,15 +80,15 @@ fn cli() -> App<'static> {
                 .max_values(2)
                 .help("Line number range to display. Must be a valid integer range format (ex: 0 10 to display the first 10 lines)."),
         )
+        // .arg(
+        //     arg!(--"date-range" <VALUE>)
+        //         .required(false)
+        //         .value_parser(validate::valid_date_range_value)
+        //         .multiple_values(true)
+        //         .min_values(1)
+        //         .max_values(2)
+        //         .help("Date range to display. Must be a valid date range format (ex:\"2022-01-01\" \"2022-01-02\")."),
         .arg(
-            arg!(--"date-range" <VALUE>)
-                .required(false)
-                .value_parser(validate::valid_date_range_value)
-                .multiple_values(true)
-                .min_values(1)
-                .max_values(2)
-                .help("Date range to display. Must be a valid date range format (ex:\"2022-01-01\" \"2022-01-02\")."),
-        ).arg(
             arg!(--head <VALUE>).default_missing_value("5")
             .required(false).value_parser(value_parser!(usize))
             .help("Display the top VALUE lines.")
