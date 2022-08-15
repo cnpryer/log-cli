@@ -5,7 +5,6 @@
 
 Command line interface for log files.
 
-
 ## Installation
 
 To install `log-cli` run:
