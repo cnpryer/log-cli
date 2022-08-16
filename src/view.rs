@@ -6,13 +6,17 @@ use std::{
 
 use clap::parser::ValuesRef;
 
-/// Viewer struct used to perform view operations on file buffers and line iterators.
+/// Viewer struct used to perform view operations on file buffers.
 #[derive(Default)]
 pub struct Viewer {
     keywords: Option<Vec<String>>,
     line_range: Option<Vec<usize>>,
+    #[allow(dead_code)]
     date_range: Option<Vec<String>>,
     head: Option<usize>,
+    #[allow(dead_code)]
+    all: Option<bool>,
+    any: Option<bool>,
 }
 
 impl Viewer {
@@ -21,98 +25,59 @@ impl Viewer {
         line_range: Option<ValuesRef<'_, usize>>,
         date_range: Option<ValuesRef<'_, String>>,
         head: Option<&usize>,
+        all: Option<&bool>,
+        any: Option<&bool>,
     ) -> Viewer {
-        match (keywords, line_range, date_range, head) {
-            // Keywords and line range.
-            (Some(kw), Some(lr), None, None) => Viewer {
-                keywords: Some(kw.into_iter().cloned().collect()),
-                line_range: Some(lr.into_iter().copied().collect()),
-                date_range: None,
-                head: None,
-            },
-            // Keywords and date range.
-            (Some(kw), None, Some(dr), None) => Viewer {
-                keywords: Some(kw.into_iter().cloned().collect()),
-                line_range: None,
-                date_range: Some(dr.into_iter().cloned().collect()),
-                head: None,
-            },
-            // Keywords.
-            (Some(kw), None, None, None) => Viewer {
-                keywords: Some(kw.into_iter().cloned().collect()),
-                line_range: None,
-                date_range: None,
-                head: None,
-            },
-            // Nothing provided.
-            (None, None, None, None) => Viewer {
-                keywords: None,
-                line_range: None,
-                date_range: None,
-                head: None,
-            },
-            // Date range.
-            (None, None, Some(dr), None) => Viewer {
-                keywords: None,
-                line_range: None,
-                date_range: Some(dr.into_iter().cloned().collect()),
-                head: None,
-            },
-            // Line range.
-            (None, Some(lr), None, None) => Viewer {
-                keywords: None,
-                line_range: Some(lr.into_iter().copied().collect()),
-                date_range: None,
-                head: None,
-            },
-            // Head.
-            (None, None, None, Some(h)) => Viewer {
-                keywords: None,
-                line_range: None,
-                date_range: None,
-                head: Some(*h),
-            },
-            // Date range and head.
-            (None, None, Some(dr), Some(h)) => Viewer {
-                keywords: None,
-                line_range: None,
-                date_range: Some(dr.into_iter().cloned().collect()),
-                head: Some(*h),
-            },
-            // Line range and head.
-            (None, Some(lr), None, Some(h)) => Viewer {
-                keywords: None,
-                line_range: Some(lr.into_iter().copied().collect()),
-                date_range: None,
-                head: Some(*h),
-            },
-            // Keywords and head.
-            (Some(kw), None, None, Some(h)) => Viewer {
-                keywords: Some(kw.into_iter().cloned().collect()),
-                line_range: None,
-                date_range: None,
-                head: Some(*h),
-            },
-            _ => unreachable!(),
+        let mut _keywords = None;
+        let mut _line_range = None;
+        let mut _date_range = None;
+        let mut _head = None;
+        let mut _all = None;
+        let mut _any = None;
+
+        if let Some(v) = keywords {
+            _keywords = Some(v.into_iter().cloned().collect());
+        }
+        if let Some(v) = line_range {
+            _line_range = Some(v.into_iter().cloned().collect());
+        }
+        if let Some(v) = date_range {
+            _date_range = Some(v.into_iter().cloned().collect());
+        }
+        if let Some(v) = head {
+            _head = Some(*v);
+        }
+        if let Some(v) = all {
+            _all = Some(*v);
+        }
+        if let Some(v) = any {
+            _any = Some(*v);
+        }
+
+        Viewer {
+            keywords: _keywords,
+            line_range: _line_range,
+            date_range: _date_range,
+            head: _head,
+            all: _all,
+            any: _any,
         }
     }
 
-    /// Filter an iterator of String lines for line numbers selected by the line range.
-    fn filter_with_line_range<I>(
+    /// Filter enumerated lines for line numbers selected by the line range.
+    fn filter_with_line_range(
         &self,
-        iter: I,
+        lines: &[(usize, String)],
         range: &Vec<usize>,
-    ) -> Result<impl Iterator<Item = (usize, String)>, &str>
-    where
-        I: Iterator<Item = (usize, String)>,
-    {
+    ) -> Result<Vec<(usize, String)>, &str> {
         // The range given is invalid if it has more than two values.
         // TODO: Should this be a panic?
         if range.len() > 2 {
             return Err("The range provided has more than two elements.");
         }
 
-        let res = iter
+        let res = lines
+            .iter()
             .filter(|(i, _)| {
                 // If line range is only one value skip ln if it's not the selected ln.
                 if range.len() == 1 && *i != range[0] {
@@ -126,59 +91,36 @@ impl Viewer {
 
                 true
             })
-            .collect::<Vec<(usize, String)>>()
-            .into_iter();
+            .into_iter()
+            .cloned()
+            .collect();
 
         Ok(res)
     }
 
-    /// Filter an iterator of String lines for dates selected by the date range.
-    fn _filter_with_date_range<I>(&self, _iter: I, range: &Vec<usize>) -> Result<(), &str>
-    where
-        I: Iterator<Item = (usize, String)>,
-    {
-        // The range given is invalid if it has more than two values.
-        // TODO: Should this be a panic?
-        if range.len() > 2 {
-            return Err("The range provided has more than two elements.");
-        }
-
-        // for line in buffer.lines().flatten() {
-        //     println!("{}", line);
-        // }
-        unimplemented!()
-    }
-
-    /// Filter iterator of String lines containing keywords depending on a desired evaulation strategy (eval).
+    /// Filter enumerated lines containing keywords depending on a desired evaulation strategy (eval).
     /// An eval can be "all" or "any".
-    fn filter_with_keywords<I>(
+    fn filter_with_keywords(
         &self,
-        iter: I,
+        lines: &[(usize, String)],
         keywords: &[String],
         eval: &str, // TODO: Use clap-recognizable enum
-    ) -> Result<impl Iterator<Item = (usize, String)>, &str>
-    where
-        I: Iterator<Item = (usize, String)>,
-    {
+    ) -> Result<Vec<(usize, String)>, &str> {
         // Filter lines for lines that contain any of the keywords indicated by caller.
-        let res = iter
+        let res = lines
+            .iter()
             .filter(|(_, l)| vec_elements_in_string(keywords, l, eval))
-            .collect::<Vec<(usize, String)>>()
-            .into_iter();
+            .into_iter()
+            .cloned()
+            .collect();
 
         Ok(res)
     }
 
     /// Display the entire file.
-    fn display_lines<I>(&self, iter: I) -> Result<(), &str>
-    where
-        I: Iterator<Item = (usize, String)>,
-    {
-        // TODO: Store either metadata from initial file read or store upfront after intially collecting
-        //       or storing the iterator.
-        let lines: Vec<(usize, String)> = iter.collect();
-
+    fn display_lines(&self, lines: &[(usize, String)]) -> Result<(), &str> {
         // If no lines are collected correctly display nothing.
+        // TODO: Maybe panic.
         if lines.is_empty() {
             return Ok(());
         }
@@ -188,7 +130,7 @@ impl Viewer {
 
         // Display each line numbered with padding based on the number of lines collected.
         // TODO: Could use generic binary search fn to calculate digits without conversion.
-        for (i, line) in &lines {
+        for (i, line) in lines {
             println!(
                 "ln{:0width$} {}",
                 i,
@@ -203,60 +145,41 @@ impl Viewer {
     /// Display with viewer function to display the file via its `BufReader`.
     // TODO:
     //       - Validation and error handling.
+    //       - Use Enum eval.
     pub fn display_with(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
-        match (
-            self.keywords.as_ref(),
-            self.line_range.as_ref(),
-            self.date_range.as_ref(),
-            self.head.as_ref(),
-        ) {
-            // Keywords and line range.
-            (Some(kw), Some(lr), None, None) => {
-                let lines =
-                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), lr)?;
-                let lines = self.filter_with_keywords(lines, kw, "all")?;
-                self.display_lines(lines)
+        // Collect enumerated lines.
+        let mut lines: Vec<(usize, String)> = buffer.lines().flatten().enumerate().collect();
+        // TODO: Enum.
+        let mut eval = "all";
+
+        // Update eval if 'any' provided.
+        if let Some(any) = self.any {
+            if any {
+                eval = "any"
             }
-            // Nothing provided.
-            (None, None, None, None) => self.display_lines(buffer.lines().flatten().enumerate()),
-            // Date range.
-            (None, None, Some(_), None) => unimplemented!(),
-            // Line range.
-            (None, Some(lr), None, None) => {
-                let lines =
-                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), lr)?;
-                self.display_lines(lines)
-            }
-            // Keywords.
-            (Some(kw), None, None, None) => {
-                let lines =
-                    self.filter_with_keywords(buffer.lines().flatten().enumerate(), kw, "all")?;
-                self.display_lines(lines)
-            }
-            // Keywords and date range.
-            (Some(_), None, Some(_), None) => unimplemented!(),
-            // Head.
-            (None, None, None, Some(h)) => {
-                let lr = vec![0, *h - 1];
-                let lines =
-                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), &lr)?;
-                self.display_lines(lines)
-            }
-            // Keywords and head.
-            (Some(kw), None, None, Some(h)) => {
-                let lr = vec![0, *h - 1];
-                let lines =
-                    self.filter_with_line_range(buffer.lines().flatten().enumerate(), &lr)?;
-                let lines = self.filter_with_keywords(lines, kw, "all")?;
-                self.display_lines(lines)
-            }
-            _ => unreachable!(),
         }
+
+        // Return head view if one is provided.
+        if let Some(head) = &self.head {
+            let range = vec![0, head - 1];
+            lines = self.filter_with_line_range(&lines, &range)?;
+        }
+
+        // Filter using ranges if provided.
+        if let Some(range) = &self.line_range {
+            lines = self.filter_with_line_range(&lines, range)?;
+        }
+
+        if let Some(keywords) = &self.keywords {
+            lines = self.filter_with_keywords(&lines, keywords, eval)?;
+        }
+
+        self.display_lines(&lines)
     }
 }
 
 /// Check string for "any" or "all" (eval) elements from vector. Return true of eval is met, otherwise return false.
-// TODO: Use Result.
+// TODO: Use Result and eval Enum.
 fn vec_elements_in_string(vec: &[String], string: &str, eval: &str) -> bool {
     if eval == "all" {
         return vec.iter().all(|e| string.contains(e));
@@ -281,16 +204,15 @@ fn test_viewer_none() {
 #[test]
 fn test_viewer_keywords() {
     let viewer = Viewer::default();
-    let iter = vec!["first".to_string(), "second".to_string(), "foo".to_string()]
-        .into_iter()
-        .enumerate();
+    let lines = vec![
+        (0, "first".to_string()),
+        (1, "second".to_string()),
+        (2, "foo".to_string()),
+    ];
     let keywords = vec!["foo".to_string()];
 
-    if let Ok(res) = viewer.filter_with_keywords(iter, &keywords, "all") {
-        assert_eq!(
-            res.collect::<Vec<(usize, String)>>(),
-            vec![(2, "foo".to_string())]
-        );
+    if let Ok(res) = viewer.filter_with_keywords(&lines, &keywords, "all") {
+        assert_eq!(res, vec![(2, "foo".to_string())]);
         return;
     } else {
         // Fail if result didn't return Ok.
@@ -301,39 +223,27 @@ fn test_viewer_keywords() {
 #[test]
 fn test_viewer_line_range() {
     let viewer = Viewer::default();
-    let iter1 = vec![
-        "first".to_string(),
-        "second".to_string(),
-        "third".to_string(),
-    ]
-    .into_iter()
-    .enumerate();
-    let iter2 = vec![
-        "fourth".to_string(),
-        "fifth".to_string(),
-        "sixth".to_string(),
-    ]
-    .into_iter()
-    .enumerate();
+    let lines = vec![
+        (0, "first".to_string()),
+        (1, "second".to_string()),
+        (2, "third".to_string()),
+    ];
     let range1 = vec![0];
     let range2 = vec![1, 2];
 
     // Test with one value.
-    if let Ok(res) = viewer.filter_with_line_range(iter1, &range1) {
-        assert_eq!(
-            res.collect::<Vec<(usize, String)>>(),
-            vec![(0, "first".to_string())]
-        );
+    if let Ok(res) = viewer.filter_with_line_range(&lines, &range1) {
+        assert_eq!(res, vec![(0, "first".to_string())]);
     } else {
         // Fail if result didn't return Ok.
         assert!(false);
     }
 
     // Test with two values.
-    if let Ok(res) = viewer.filter_with_line_range(iter2, &range2) {
+    if let Ok(res) = viewer.filter_with_line_range(&lines, &range2) {
         assert_eq!(
-            res.collect::<Vec<(usize, String)>>(),
-            vec![(1, "fifth".to_string()), (2, "sixth".to_string())]
+            res,
+            vec![(1, "second".to_string()), (2, "third".to_string())]
         );
     } else {
         // Fail if result didn't return Ok.
