@@ -47,15 +47,10 @@ ln23 2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
 ### View using keywords
 
 ```console
-> log-cli sample.log --keywords "[debug]" "[warning]"
-
-ln02 2022-01-01 09:00:00,0 [debug] module2  Message Subject: Text for a message.
-ln03 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
-ln04 2022-01-01 11:00:00,0 [debug] module2  Message Subject: Text for a message.
-ln13 2022-01-01 20:00:00,0 [debug] module5  Message Subject: Text for a message.
-ln17 2022-01-02 00:00:00,0 [warning] module1  Message Subject: Text for a message.
-ln20 2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
-ln21 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
+> log-cli sample.log --keywords "[debug]" module2
+ln2 2022-01-01 09:00:00,0 [debug] module2  Message Subject: Text for a message.
+ln3 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
+ln4 2022-01-01 11:00:00,0 [debug] module2  Message Subject: Text for a message
 ```
 
 ### View using a line range
@@ -84,6 +79,8 @@ ARGS:
                   entire file will be displayed.
 
 OPTIONS:
+        --all                      Set evaluation strategy to 'all'.
+        --any                      Set evaluation strategy to 'any'.
     -h, --help                     Print help information
         --head <VALUE>             Display the top VALUE lines.
         --keywords <VALUE>...      Keywords to search for in the log file. Multiple keywords can be
