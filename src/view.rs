@@ -1,20 +1,16 @@
+use crate::command::RangeSelectionData;
+use clap::parser::ValuesRef;
 use std::{
     fs::File,
     io::{BufRead, BufReader},
     vec,
 };
 
-use clap::parser::ValuesRef;
-
 /// Viewer struct used to perform view operations on file buffers.
 #[derive(Default)]
 pub struct Viewer {
     keywords: Option<Vec<String>>,
-    line_range: Option<Vec<usize>>,
-    #[allow(dead_code)]
-    date_range: Option<Vec<String>>,
-    head: Option<usize>,
-    #[allow(dead_code)]
+    ranges: Option<RangeSelectionData>,
     all: Option<bool>,
     any: Option<bool>,
 }
@@ -22,31 +18,23 @@ pub struct Viewer {
 impl Viewer {
     pub fn new(
         keywords: Option<ValuesRef<'_, String>>,
-        line_range: Option<ValuesRef<'_, usize>>,
-        date_range: Option<ValuesRef<'_, String>>,
-        head: Option<&usize>,
+        ranges: Option<RangeSelectionData>,
         all: Option<&bool>,
         any: Option<&bool>,
     ) -> Viewer {
         let mut _keywords = None;
-        let mut _line_range = None;
-        let mut _date_range = None;
-        let mut _head = None;
+        let mut _ranges = None;
         let mut _all = None;
         let mut _any = None;
 
         if let Some(v) = keywords {
             _keywords = Some(v.into_iter().cloned().collect());
         }
-        if let Some(v) = line_range {
-            _line_range = Some(v.into_iter().cloned().collect());
+
+        if let Some(v) = ranges {
+            _ranges = Some(v);
         }
-        if let Some(v) = date_range {
-            _date_range = Some(v.into_iter().cloned().collect());
-        }
-        if let Some(v) = head {
-            _head = Some(*v);
-        }
+
         if let Some(v) = all {
             _all = Some(*v);
         }
@@ -54,14 +42,18 @@ impl Viewer {
             _any = Some(*v);
         }
 
-        Viewer {
+        let viewer = Viewer {
             keywords: _keywords,
-            line_range: _line_range,
-            date_range: _date_range,
-            head: _head,
+            ranges: _ranges,
             all: _all,
             any: _any,
+        };
+
+        if let Err(msg) = validate_viewer(&viewer) {
+            panic!("{:?}", msg);
         }
+
+        viewer
     }
 
     /// Filter enumerated lines for line numbers selected by the line range.
@@ -160,14 +152,16 @@ impl Viewer {
         }
 
         // Return head view if one is provided.
-        if let Some(head) = &self.head {
-            let range = vec![0, head - 1];
-            lines = self.filter_with_line_range(&lines, &range)?;
-        }
+        if let Some(ranges) = &self.ranges {
+            if let Some(head) = &ranges.head {
+                let range = vec![0, head - 1];
+                lines = self.filter_with_line_range(&lines, &range)?;
+            }
 
-        // Filter using ranges if provided.
-        if let Some(range) = &self.line_range {
-            lines = self.filter_with_line_range(&lines, range)?;
+            // Filter using ranges if provided.
+            if let Some(range) = &ranges.line_range {
+                lines = self.filter_with_line_range(&lines, range)?;
+            }
         }
 
         if let Some(keywords) = &self.keywords {
@@ -176,6 +170,35 @@ impl Viewer {
 
         self.display_lines(&lines)
     }
+}
+
+/// Validate viewer setup.
+fn validate_viewer(viewer: &Viewer) -> Result<(), &str> {
+    // Either all or any should be true.
+    if let (Some(all), Some(any)) = (viewer.all, viewer.any) {
+        if all && any {
+            return Err("Cannot set both any and all to true.");
+        }
+    }
+
+    if let Some(ranges) = &viewer.ranges {
+        // Both line ranges and date ranges cannot be set.
+        if let (Some(_), Some(_)) = (&ranges.line_range, &ranges.date_range) {
+            return Err("Cannot set both line range and date range.");
+        }
+
+        // Both head and line range cannot be set.
+        if let (Some(_), Some(_)) = (&ranges.head, &ranges.line_range) {
+            return Err("Cannot set both head and line range.");
+        }
+
+        // Both head and date range cannot be set.
+        if let (Some(_), Some(_)) = (&ranges.head, &ranges.date_range) {
+            return Err("Cannot set both head and date range.");
+        }
+    }
+
+    Ok(())
 }
 
 /// Check string for "any" or "all" (eval) elements from vector. Return true of eval is met, otherwise return false.
@@ -192,61 +215,66 @@ fn string_contains_vec_elements(string: &str, vec: &[String], eval: &str) -> boo
     false
 }
 
-#[test]
-fn test_viewer_none() {
-    let viewer = Viewer::default();
+#[cfg(test)]
+mod tests {
 
-    assert_eq!(viewer.line_range, None);
-    assert_eq!(viewer.date_range, None);
-    assert_eq!(viewer.keywords, None);
-}
+    use super::*;
 
-#[test]
-fn test_viewer_keywords() {
-    let viewer = Viewer::default();
-    let lines = vec![
-        (0, "first".to_string()),
-        (1, "second".to_string()),
-        (2, "foo".to_string()),
-    ];
-    let keywords = vec!["foo".to_string()];
+    #[test]
+    fn test_viewer_none() {
+        let viewer = Viewer::default();
 
-    if let Ok(res) = viewer.filter_with_keywords(&lines, &keywords, "all") {
-        assert_eq!(res, vec![(2, "foo".to_string())]);
-        return;
-    } else {
-        // Fail if result didn't return Ok.
-        assert!(false);
-    }
-}
-
-#[test]
-fn test_viewer_line_range() {
-    let viewer = Viewer::default();
-    let lines = vec![
-        (0, "first".to_string()),
-        (1, "second".to_string()),
-        (2, "third".to_string()),
-    ];
-    let range1 = vec![0];
-    let range2 = vec![1, 2];
-
-    // Test with one value.
-    if let Ok(res) = viewer.filter_with_line_range(&lines, &range1) {
-        assert_eq!(res, vec![(0, "first".to_string())]);
-    } else {
-        // Fail if result didn't return Ok.
-        assert!(false);
+        assert_eq!(viewer.keywords, None);
+        assert!(viewer.ranges.is_none());
     }
 
-    // Test with two values.
-    if let Ok(res) = viewer.filter_with_line_range(&lines, &range2) {
-        assert_eq!(
-            res,
-            vec![(1, "second".to_string()), (2, "third".to_string())]
-        );
-    } else {
-        // Fail if result didn't return Ok.
-        assert!(false);
+    #[test]
+    fn test_viewer_keywords() {
+        let viewer = Viewer::default();
+        let lines = vec![
+            (0, "first".to_string()),
+            (1, "second".to_string()),
+            (2, "foo".to_string()),
+        ];
+        let keywords = vec!["foo".to_string()];
+
+        if let Ok(res) = viewer.filter_with_keywords(&lines, &keywords, "all") {
+            assert_eq!(res, vec![(2, "foo".to_string())]);
+            return;
+        } else {
+            // Fail if result didn't return Ok.
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn test_viewer_line_range() {
+        let viewer = Viewer::default();
+        let lines = vec![
+            (0, "first".to_string()),
+            (1, "second".to_string()),
+            (2, "third".to_string()),
+        ];
+        let range1 = vec![0];
+        let range2 = vec![1, 2];
+
+        // Test with one value.
+        if let Ok(res) = viewer.filter_with_line_range(&lines, &range1) {
+            assert_eq!(res, vec![(0, "first".to_string())]);
+        } else {
+            // Fail if result didn't return Ok.
+            assert!(false);
+        }
+
+        // Test with two values.
+        if let Ok(res) = viewer.filter_with_line_range(&lines, &range2) {
+            assert_eq!(
+                res,
+                vec![(1, "second".to_string()), (2, "third".to_string())]
+            );
+        } else {
+            // Fail if result didn't return Ok.
+            assert!(false);
+        }
     }
 }

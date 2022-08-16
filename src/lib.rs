@@ -86,6 +86,8 @@
 //!     -V, --version                  Print version information
 //! ```
 
+/// Command implementations.
+pub mod command;
 /// `File` reading logic for log files.
 pub mod read;
 /// Validation logic for argument values and more.
