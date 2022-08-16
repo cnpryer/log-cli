@@ -109,7 +109,7 @@ impl Viewer {
         // Filter lines for lines that contain any of the keywords indicated by caller.
         let res = lines
             .iter()
-            .filter(|(_, l)| vec_elements_in_string(keywords, l, eval))
+            .filter(|(_, l)| string_contains_vec_elements(l, keywords, eval))
             .into_iter()
             .cloned()
             .collect();
@@ -180,7 +180,7 @@ impl Viewer {
 
 /// Check string for "any" or "all" (eval) elements from vector. Return true of eval is met, otherwise return false.
 // TODO: Use Result and eval Enum.
-fn vec_elements_in_string(vec: &[String], string: &str, eval: &str) -> bool {
+fn string_contains_vec_elements(string: &str, vec: &[String], eval: &str) -> bool {
     if eval == "all" {
         return vec.iter().all(|e| string.contains(e));
     }
