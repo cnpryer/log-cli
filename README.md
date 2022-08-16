@@ -50,7 +50,7 @@ ln23 2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
 > log-cli sample.log --keywords "[debug]" module2
 ln2 2022-01-01 09:00:00,0 [debug] module2  Message Subject: Text for a message.
 ln3 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
-ln4 2022-01-01 11:00:00,0 [debug] module2  Message Subject: Text for a message
+ln4 2022-01-01 11:00:00,0 [debug] module2  Message Subject: Text for a message.
 ```
 
 ### View using a line range
