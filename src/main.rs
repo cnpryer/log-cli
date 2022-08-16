@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{arg, value_parser, App, Command, ErrorKind};
+use clap::{arg, value_parser, App, ArgAction, Command, ErrorKind};
 use log_cli::{read::read_file, validate, view::Viewer};
 
 const VERSION: &str = "0.0.3";
@@ -17,6 +17,8 @@ fn main() {
     // TODO
     let date_range = None; //matches.get_many::<String>("date-range");
     let head = matches.get_one::<usize>("head");
+    let all = matches.get_one::<bool>("all");
+    let any = matches.get_one::<bool>("any");
 
     // Certain arguments cannot be used together. Error if this is the case.
     if line_range.is_some() && date_range.is_some() {
@@ -40,6 +42,15 @@ fn main() {
         )
         .exit();
     }
+    if let (Some(_all), Some(_any)) = (all, any) {
+        if *_all && *_any {
+            app.error(
+                ErrorKind::ArgumentConflict,
+                "Cannot use all and any flags together.",
+            )
+            .exit();
+        }
+    }
 
     // Path to log file to read.
     let filepath = matches
@@ -48,7 +59,7 @@ fn main() {
 
     // Read the file to a buffer and build a viewer for view operations.
     let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
-    let viewer = Viewer::new(keywords, line_range, date_range, head);
+    let viewer = Viewer::new(keywords, line_range, date_range, head, all, any);
 
     // Attempt to display the contents otherwise print the error.
     if let Err(e) = viewer.display_with(buffer) {
@@ -93,6 +104,20 @@ fn cli() -> App<'static> {
             arg!(--head <VALUE>).default_missing_value("5")
             .required(false).value_parser(value_parser!(usize))
             .help("Display the top VALUE lines.")
+        )
+        .arg(
+            arg!(--all)
+            .required(false)
+            .takes_value(false)
+            .action(ArgAction::SetTrue)
+            .help("Set evaluation strategy to 'all'.")
+        )
+        .arg(
+            arg!(--any)
+            .required(false)
+            .takes_value(false)
+            .action(ArgAction::SetTrue)
+            .help("Set evaluation strategy to 'any'.")
         );
 
     app
