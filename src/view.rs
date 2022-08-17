@@ -118,26 +118,17 @@ impl Viewer {
         Ok(res)
     }
 
-    /// Display the entire file.
-    fn display_lines(&self, lines: &[(usize, String)]) -> Result<(), &str> {
+    /// Display the entire file padding the line numbers using `ln_pad`.
+    fn display_lines(&self, lines: &[(usize, String)], ln_pad: usize) -> Result<(), &str> {
         // If no lines are collected correctly display nothing.
         // TODO: Maybe panic.
         if lines.is_empty() {
             return Ok(());
         }
 
-        // Last line number (assumed sorted ascending) determines line number padding.
-        let last_ln = lines[lines.len() - 1].0;
-
         // Display each line numbered with padding based on the number of lines collected.
-        // TODO: Could use generic binary search fn to calculate digits without conversion.
         for (i, line) in lines {
-            println!(
-                "ln{:0width$} {}",
-                i,
-                line,
-                width = last_ln.to_string().len()
-            );
+            println!("ln{:0width$} {}", i, line, width = ln_pad);
         }
 
         Ok(())
@@ -150,6 +141,7 @@ impl Viewer {
     pub fn display_with(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
         // Collect enumerated lines.
         let mut lines: Vec<(usize, String)> = buffer.lines().flatten().enumerate().collect();
+
         // TODO: Enum.
         let mut eval = "all";
 
@@ -193,7 +185,9 @@ impl Viewer {
             lines = self.filter_with_line_range(&lines, &range)?;
         }
 
-        self.display_lines(&lines)
+        // Display lines padding line numbers based on the amount of lines after any filtering.
+        // TODO: Could use generic binary search fn to calculate digits without converting to string.
+        self.display_lines(&lines, (lines.len() - 1).to_string().len())
     }
 }
 
