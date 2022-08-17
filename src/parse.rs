@@ -46,7 +46,7 @@ pub fn parse_date_range_value(value: &str) -> Result<String, String> {
 }
 
 #[test]
-fn test_line_range_validation() {
+fn test_parse_line_range() {
     let valid_value = "0";
     let invalid_value = "foo";
 
@@ -58,7 +58,7 @@ fn test_line_range_validation() {
 }
 
 #[test]
-fn test_date_range_validation() {
+fn test_parse_date_range() {
     let valid_value = "2022-01-01";
     let invalid_value = "foo";
 
