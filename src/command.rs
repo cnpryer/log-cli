@@ -52,7 +52,7 @@ impl RangeSelectionData {
     }
 }
 
-/// Validate that range selection combincations are compatible, otherwise return Err.
+/// Validate that range selection combinations are compatible, otherwise return Err.
 pub(crate) fn validate_range_selection_combinations(
     ranges: &RangeSelectionData,
 ) -> Result<(), &str> {
@@ -68,11 +68,11 @@ pub(crate) fn validate_range_selection_combinations(
         (Some(_), None, Some(_), None) => Err("Cannot use both line range and head."),
         // Can't use both date range and head.
         (None, Some(_), Some(_), None) => Err("Cannot use both date range and head."),
-        // Can't have both line range and tail.
+        // Can't use both line range and tail.
         (Some(_), None, None, Some(_)) => Err("Cannot use both line range and tail."),
-        // Can't have both date range and tail
+        // Can't use both date range and tail
         (None, Some(_), None, Some(_)) => Err("Cannot use both date range and tail."),
-        // Can't have both head and tail.
+        // Can't use both head and tail.
         (None, None, Some(_), Some(_)) => Err("Cannot use both head and tail."),
         _ => Ok(()),
     }
