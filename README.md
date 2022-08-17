@@ -86,6 +86,7 @@ OPTIONS:
         --head <VALUE>             Display the top VALUE lines.
         --keywords <VALUE>...      Keywords to search for in the log file. Multiple keywords can be
                                    passed (ex: these are all keywords).
+        --latest <VALUE>           Set evaluation strategy to 'latest' VALUE lines.
         --line-range <VALUE>...    Line number range to display. Must be a valid integer range
                                    format (ex: 0 10 to display the first 10 lines).
         --tail <VALUE>             Display the bottom VALUE lines.

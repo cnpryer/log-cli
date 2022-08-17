@@ -13,6 +13,7 @@ pub struct Viewer {
     ranges: Option<RangeSelectionData>,
     all: Option<bool>,
     any: Option<bool>,
+    latest: Option<usize>,
 }
 
 impl Viewer {
@@ -21,11 +22,13 @@ impl Viewer {
         ranges: Option<RangeSelectionData>,
         all: Option<&bool>,
         any: Option<&bool>,
+        latest: Option<&usize>,
     ) -> Viewer {
         let mut _keywords = None;
         let mut _ranges = None;
         let mut _all = None;
         let mut _any = None;
+        let mut _latest = None;
 
         if let Some(v) = keywords {
             _keywords = Some(v.into_iter().cloned().collect());
@@ -43,11 +46,16 @@ impl Viewer {
             _any = Some(*v);
         }
 
+        if let Some(v) = latest {
+            _latest = Some(*v);
+        }
+
         let viewer = Viewer {
             keywords: _keywords,
             ranges: _ranges,
             all: _all,
             any: _any,
+            latest: _latest,
         };
 
         if let Err(msg) = validate_viewer_combinations(&viewer) {
@@ -172,8 +180,17 @@ impl Viewer {
             }
         }
 
+        // Filter keywords from remaining lines.
         if let Some(keywords) = &self.keywords {
             lines = self.filter_with_keywords(&lines, keywords, eval)?;
+        }
+
+        // Filter for latest N found in remaining lines.
+        if let Some(n) = &self.latest {
+            // TODO: Warning. Remove this after dates utilized.
+            println!("WARNING: File is expected to already be in sorted order.");
+            let range = vec![lines.len() - n, lines.len() - 1];
+            lines = self.filter_with_line_range(&lines, &range)?;
         }
 
         self.display_lines(&lines)
