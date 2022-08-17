@@ -3,10 +3,10 @@ use chrono::NaiveDate;
 /// Required date format.
 const DATE_FORMAT: &str = "%Y-%m-%d";
 
-/// Validate line range argument value(s). Return vector of at most integers or error.
+/// Parse line range argument value(s). Return vector of at most integers or error.
 /// A valid line range can be either one line number (1 for line one) or two line numbers to indicate
 /// multiple lines (0 20 to get first 20 lines).
-pub fn valid_line_range_value(value: &str) -> Result<usize, String> {
+pub fn parse_line_range_value(value: &str) -> Result<usize, String> {
     // Attempt to parse u32 values from string values.
     let res: usize = value
         .parse()
@@ -32,11 +32,11 @@ fn is_date_like(value: &str) -> Result<bool, String> {
     Ok(true)
 }
 
-/// Validate date range argument value(s). Return vector of at most 2 strings or error.
+/// Parse date range argument value(s). Return vector of at most 2 strings or error.
 /// A valid date range can be either one date string ("2022-01-01" for just January 1st) or two
 /// strings to indicate an inclusive range of dates ("2022-01-01" "2022-01-02").
 // TODO: Accept datetimes.
-pub fn valid_date_range_value(value: &str) -> Result<String, String> {
+pub fn parse_date_range_value(value: &str) -> Result<String, String> {
     // Check if value passed is a valid date formatted string.
     if let Ok(false) = is_date_like(value) {
         return Err(format!("Date format must be {}.", DATE_FORMAT));
@@ -50,9 +50,9 @@ fn test_line_range_validation() {
     let valid_value = "0";
     let invalid_value = "foo";
 
-    assert_eq!(valid_line_range_value(valid_value), Ok(0));
+    assert_eq!(parse_line_range_value(valid_value), Ok(0));
     assert_eq!(
-        valid_line_range_value(invalid_value),
+        parse_line_range_value(invalid_value),
         Err(format!("{} must be a valid usize.", invalid_value))
     );
 }
@@ -63,11 +63,11 @@ fn test_date_range_validation() {
     let invalid_value = "foo";
 
     assert_eq!(
-        valid_date_range_value(valid_value),
+        parse_date_range_value(valid_value),
         Ok("2022-01-01".to_string())
     );
     assert_eq!(
-        valid_date_range_value(invalid_value),
+        parse_date_range_value(invalid_value),
         Err(format!("Date format must be {}.", DATE_FORMAT))
     );
 }

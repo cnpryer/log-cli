@@ -88,5 +88,6 @@ OPTIONS:
                                    passed (ex: these are all keywords).
         --line-range <VALUE>...    Line number range to display. Must be a valid integer range
                                    format (ex: 0 10 to display the first 10 lines).
+        --tail <VALUE>             Display the bottom VALUE lines.
     -V, --version                  Print version information
 ```
