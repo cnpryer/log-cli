@@ -83,14 +83,15 @@
 //!                                    passed (ex: these are all keywords).
 //!         --line-range <VALUE>...    Line number range to display. Must be a valid integer range
 //!                                    format (ex: 0 10 to display the first 10 lines).
+//!         --tail <VALUE>             Display the bottom VALUE lines.
 //!     -V, --version                  Print version information
 //! ```
 
 /// Command implementations.
 pub mod command;
+/// Parsing implementations.
+pub mod parse;
 /// `File` reading logic for log files.
 pub mod read;
-/// Validation logic for argument values and more.
-pub mod validate;
-/// `File` display application logic for `log-cli`.
+/// Display implementations.
 pub mod view;

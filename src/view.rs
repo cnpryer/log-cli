@@ -1,4 +1,4 @@
-use crate::command::RangeSelectionData;
+use crate::command::{self, RangeSelectionData};
 use clap::parser::ValuesRef;
 use std::{
     fs::File,
@@ -38,6 +38,7 @@ impl Viewer {
         if let Some(v) = all {
             _all = Some(*v);
         }
+
         if let Some(v) = any {
             _any = Some(*v);
         }
@@ -49,7 +50,7 @@ impl Viewer {
             any: _any,
         };
 
-        if let Err(msg) = validate_viewer(&viewer) {
+        if let Err(msg) = validate_viewer_combinations(&viewer) {
             panic!("{:?}", msg);
         }
 
@@ -153,12 +154,19 @@ impl Viewer {
 
         // Return head view if one is provided.
         if let Some(ranges) = &self.ranges {
+            // Filter head.
             if let Some(head) = &ranges.head {
                 let range = vec![0, head - 1];
                 lines = self.filter_with_line_range(&lines, &range)?;
             }
 
-            // Filter using ranges if provided.
+            // Filter tail.
+            if let Some(tail) = &ranges.tail {
+                let range = vec![lines.len() - tail, lines.len() - 1];
+                lines = self.filter_with_line_range(&lines, &range)?;
+            }
+
+            // Filter specific line range.
             if let Some(range) = &ranges.line_range {
                 lines = self.filter_with_line_range(&lines, range)?;
             }
@@ -173,7 +181,7 @@ impl Viewer {
 }
 
 /// Validate viewer setup.
-fn validate_viewer(viewer: &Viewer) -> Result<(), &str> {
+pub(crate) fn validate_viewer_combinations(viewer: &Viewer) -> Result<(), &str> {
     // Either all or any should be true.
     if let (Some(all), Some(any)) = (viewer.all, viewer.any) {
         if all && any {
@@ -181,20 +189,10 @@ fn validate_viewer(viewer: &Viewer) -> Result<(), &str> {
         }
     }
 
+    // Validate range combinations.
     if let Some(ranges) = &viewer.ranges {
-        // Both line ranges and date ranges cannot be set.
-        if let (Some(_), Some(_)) = (&ranges.line_range, &ranges.date_range) {
-            return Err("Cannot set both line range and date range.");
-        }
-
-        // Both head and line range cannot be set.
-        if let (Some(_), Some(_)) = (&ranges.head, &ranges.line_range) {
-            return Err("Cannot set both head and line range.");
-        }
-
-        // Both head and date range cannot be set.
-        if let (Some(_), Some(_)) = (&ranges.head, &ranges.date_range) {
-            return Err("Cannot set both head and date range.");
+        if let Err(msg) = command::validate_range_selection_combinations(ranges) {
+            return Err(msg);
         }
     }
 
@@ -217,7 +215,6 @@ fn string_contains_vec_elements(string: &str, vec: &[String], eval: &str) -> boo
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
