@@ -18,6 +18,7 @@ fn main() {
     let tail = matches.get_one::<usize>("tail");
     let all = matches.get_one::<bool>("all");
     let any = matches.get_one::<bool>("any");
+    let latest = matches.get_one::<usize>("latest");
 
     // Path to log file to read.
     let filepath = matches
@@ -27,7 +28,7 @@ fn main() {
     // Read the file to a buffer and build a viewer for view operations.
     let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
     let ranges = RangeSelectionData::new(line_range, date_range, head, tail);
-    let viewer = Viewer::new(keywords, Some(ranges), all, any);
+    let viewer = Viewer::new(keywords, Some(ranges), all, any, latest);
 
     // Attempt to display the contents otherwise print the error.
     if let Err(e) = viewer.display_with(buffer) {
@@ -91,6 +92,12 @@ fn cli() -> App<'static> {
             .takes_value(false)
             .action(ArgAction::SetTrue)
             .help("Set evaluation strategy to 'any'.")
+        )
+        .arg(
+            arg!(--latest <VALUE>)
+            .required(false).value_parser(value_parser!(usize))
+            .default_missing_value("1")
+            .help("Set evaluation strategy to 'latest' VALUE lines.")
         );
 
     app
