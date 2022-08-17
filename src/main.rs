@@ -2,7 +2,7 @@ use clap::{arg, value_parser, App, ArgAction, Command};
 use log_cli::{command::RangeSelectionData, parse, read::read_file, view::Viewer};
 use std::path::PathBuf;
 
-const VERSION: &str = "0.0.4";
+const VERSION: &str = "0.0.5";
 
 fn main() {
     // Create main clap command.
