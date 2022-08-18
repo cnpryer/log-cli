@@ -57,17 +57,21 @@ fn test_parse_line_range() {
     );
 }
 
-#[test]
-fn test_parse_date_range() {
-    let valid_value = "2022-01-01";
-    let invalid_value = "foo";
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_parse_date_range() {
+        let valid_value = "2022-01-01";
+        let invalid_value = "foo";
 
-    assert_eq!(
-        parse_date_range_value(valid_value),
-        Ok("2022-01-01".to_string())
-    );
-    assert_eq!(
-        parse_date_range_value(invalid_value),
-        Err(format!("Date format must be {}.", DATE_FORMAT))
-    );
+        assert_eq!(
+            parse_date_range_value(valid_value),
+            Ok("2022-01-01".to_string())
+        );
+        assert_eq!(
+            parse_date_range_value(invalid_value),
+            Err(format!("Date format must be {}.", DATE_FORMAT))
+        );
+    }
 }

@@ -5,7 +5,7 @@ use std::{
 };
 
 /// Create a `File` `BufReader` from a `Path`. Otherwise throw IO Error.
-pub fn read_file<P>(path: P) -> Result<BufReader<File>>
+pub(crate) fn read_file<P>(path: P) -> Result<BufReader<File>>
 where
     P: AsRef<Path>,
 {

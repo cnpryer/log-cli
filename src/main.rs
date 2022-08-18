@@ -1,49 +1,12 @@
-use clap::{arg, value_parser, App, ArgAction, ArgGroup, Command};
-use log_cli::{
-    command::{EvaluationStrategyData, RangeSelectionData},
-    parse,
-    read::read_file,
-    view::Viewer,
-};
+use clap::{arg, value_parser, ArgAction, ArgGroup, Command};
+use log_cli::{parse, LogCLI};
 use std::path::PathBuf;
 
 const VERSION: &str = "0.0.7";
 
 fn main() {
     // Create main clap command.
-    let mut app = cli();
-    // Get arguments.
-    let matches = app.get_matches_mut();
-
-    // Get optional argument values.
-    let keywords = matches.get_many::<String>("keywords");
-    let line_range = matches.get_many::<usize>("line-range");
-    let date_range = None; // TODO: matches.get_many::<String>("date-range");
-    let head = matches.get_one::<usize>("head");
-    let tail = matches.get_one::<usize>("tail");
-    let all = matches.get_one::<bool>("all");
-    let any = matches.get_one::<bool>("any");
-    let latest = matches.get_one::<usize>("latest");
-
-    // Path to log file to read.
-    let filepath = matches
-        .get_one::<PathBuf>("LOG_FILE")
-        .expect("A valid path to a log file is required.");
-
-    // Read the file to a buffer and build a viewer for view operations.
-    let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
-    let ranges = RangeSelectionData::new(line_range, date_range, head, tail);
-    let evals = EvaluationStrategyData::new(all, any, latest);
-    let viewer = Viewer::new(keywords, Some(ranges), Some(evals));
-
-    // Attempt to display the contents otherwise print the error.
-    if let Err(e) = viewer.display_with(buffer) {
-        eprintln!("Error: {:?}", e)
-    }
-}
-
-fn cli() -> App<'static> {
-    let app = Command::new("log-cli")
+    let cmd = Command::new("log-cli")
         .version(VERSION)
         .propagate_version(true)
         .author("Chris Pryer <cnpryer@gmail.com>")
@@ -113,5 +76,20 @@ fn cli() -> App<'static> {
             .multiple(false)
         );
 
-    app
+    // Get arguments.
+    let matches = cmd.get_matches();
+
+    // Path to log file to read.
+    let filepath = matches
+        .get_one::<PathBuf>("LOG_FILE")
+        .expect("A valid path to a log file is required.");
+
+    // Initialize the application.
+    // TODO: LogCLI::with_clip(&matches);
+    let app = LogCLI::new(&matches);
+
+    // Attempt to display the contents otherwise print the error.
+    if let Err(e) = app.run(filepath) {
+        eprintln!("Error: {:?}", e)
+    }
 }
