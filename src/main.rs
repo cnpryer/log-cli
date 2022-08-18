@@ -58,7 +58,7 @@ fn cli() -> App<'static> {
                 .multiple_values(true)
                 .min_values(1)
                 .max_values(2)
-                .help("Line number range to display. Must be a valid integer range format (ex: 0 10 to display the first 10 lines)."),
+                .help("Line number range to display. Must be a valid integer range format (ex: 0 10 to display lines 0 through 10)."),
         )
         // .arg(
         //     arg!(--"date-range" <VALUE>)
