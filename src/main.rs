@@ -38,7 +38,7 @@ fn main() {
 
     // Attempt to display the contents otherwise print the error.
     if let Err(e) = viewer.display_with(buffer) {
-        println!("ERROR: {:?}", e)
+        eprintln!("Error: {:?}", e)
     }
 }
 

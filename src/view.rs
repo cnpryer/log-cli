@@ -174,7 +174,7 @@ impl Viewer {
             if let Some(n) = evals.latest {
                 if n < lines.len() {
                     // TODO: Warning. Remove this after dates utilized.
-                    println!("WARNING: File is expected to already be in sorted order.");
+                    println!("Warning: File is expected to already be in sorted order.");
                     lines = lines[lines.len() - n..].to_vec();
                 }
             }
