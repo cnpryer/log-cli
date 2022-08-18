@@ -1,4 +1,4 @@
-use crate::command::{self, RangeSelectionData};
+use crate::command::{self, EvaluationStrategyData, RangeSelectionData};
 use clap::parser::ValuesRef;
 use std::{
     fs::File,
@@ -11,24 +11,18 @@ use std::{
 pub struct Viewer {
     keywords: Option<Vec<String>>,
     ranges: Option<RangeSelectionData>,
-    all: Option<bool>,
-    any: Option<bool>,
-    latest: Option<usize>,
+    evals: Option<EvaluationStrategyData>,
 }
 
 impl Viewer {
     pub fn new(
         keywords: Option<ValuesRef<'_, String>>,
         ranges: Option<RangeSelectionData>,
-        all: Option<&bool>,
-        any: Option<&bool>,
-        latest: Option<&usize>,
+        evals: Option<EvaluationStrategyData>,
     ) -> Viewer {
         let mut _keywords = None;
         let mut _ranges = None;
-        let mut _all = None;
-        let mut _any = None;
-        let mut _latest = None;
+        let mut _evals = None;
 
         if let Some(v) = keywords {
             _keywords = Some(v.into_iter().cloned().collect());
@@ -38,24 +32,14 @@ impl Viewer {
             _ranges = Some(v);
         }
 
-        if let Some(v) = all {
-            _all = Some(*v);
-        }
-
-        if let Some(v) = any {
-            _any = Some(*v);
-        }
-
-        if let Some(v) = latest {
-            _latest = Some(*v);
+        if let Some(v) = evals {
+            _evals = Some(v);
         }
 
         let viewer = Viewer {
             keywords: _keywords,
             ranges: _ranges,
-            all: _all,
-            any: _any,
-            latest: _latest,
+            evals: _evals,
         };
 
         if let Err(msg) = validate_viewer_combinations(&viewer) {
@@ -146,9 +130,11 @@ impl Viewer {
         let mut eval = "all";
 
         // Update eval if 'any' provided.
-        if let Some(any) = self.any {
-            if any {
-                eval = "any"
+        if let Some(evals) = &self.evals {
+            if let Some(any) = evals.any {
+                if any {
+                    eval = "any"
+                }
             }
         }
 
@@ -178,11 +164,13 @@ impl Viewer {
         }
 
         // Filter for latest N found in remaining lines.
-        if let Some(n) = &self.latest {
-            // TODO: Warning. Remove this after dates utilized.
-            println!("WARNING: File is expected to already be in sorted order.");
-            let range = vec![lines.len() - n - 1, lines.len() - 1];
-            lines = self.filter_with_line_range(&lines, &range)?;
+        if let Some(evals) = &self.evals {
+            if let Some(n) = evals.latest {
+                // TODO: Warning. Remove this after dates utilized.
+                println!("WARNING: File is expected to already be in sorted order.");
+                let range = vec![lines.len() - n - 1, lines.len() - 1];
+                lines = self.filter_with_line_range(&lines, &range)?;
+            }
         }
 
         // Display lines padding line numbers based on the amount of lines after any filtering.
@@ -194,9 +182,9 @@ impl Viewer {
 /// Validate viewer setup.
 pub(crate) fn validate_viewer_combinations(viewer: &Viewer) -> Result<(), &str> {
     // Either all or any should be true.
-    if let (Some(all), Some(any)) = (viewer.all, viewer.any) {
-        if all && any {
-            return Err("Cannot set both any and all to true.");
+    if let Some(evals) = &viewer.evals {
+        if let Err(msg) = command::validate_evaluation_strategy_combonations(evals) {
+            return Err(msg);
         }
     }
 

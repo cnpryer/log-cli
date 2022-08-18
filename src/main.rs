@@ -1,5 +1,10 @@
 use clap::{arg, value_parser, App, ArgAction, ArgGroup, Command};
-use log_cli::{command::RangeSelectionData, parse, read::read_file, view::Viewer};
+use log_cli::{
+    command::{EvaluationStrategyData, RangeSelectionData},
+    parse,
+    read::read_file,
+    view::Viewer,
+};
 use std::path::PathBuf;
 
 const VERSION: &str = "0.0.6";
@@ -28,7 +33,8 @@ fn main() {
     // Read the file to a buffer and build a viewer for view operations.
     let buffer = &mut read_file(filepath).expect("Unable to read filepath.");
     let ranges = RangeSelectionData::new(line_range, date_range, head, tail);
-    let viewer = Viewer::new(keywords, Some(ranges), all, any, latest);
+    let evals = EvaluationStrategyData::new(all, any, latest);
+    let viewer = Viewer::new(keywords, Some(ranges), Some(evals));
 
     // Attempt to display the contents otherwise print the error.
     if let Err(e) = viewer.display_with(buffer) {
