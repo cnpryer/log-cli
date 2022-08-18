@@ -78,13 +78,76 @@ pub(crate) fn validate_range_selection_combinations(
     }
 }
 
+/// Evaluation data group struct.
+#[derive(Default)]
+pub struct EvaluationStrategyData {
+    pub(crate) all: Option<bool>,
+    pub(crate) any: Option<bool>,
+    #[allow(dead_code)]
+    pub(crate) latest: Option<usize>,
+}
+
+impl EvaluationStrategyData {
+    pub fn new(
+        all: Option<&bool>,
+        any: Option<&bool>,
+        latest: Option<&usize>,
+    ) -> EvaluationStrategyData {
+        let mut _all = None;
+        let mut _any = None;
+        let mut _latest = None;
+
+        if let Some(v) = all {
+            _all = Some(*v);
+        }
+
+        if let Some(v) = any {
+            _any = Some(*v);
+        }
+
+        if let Some(v) = latest {
+            _latest = Some(*v);
+        }
+
+        let evals = EvaluationStrategyData {
+            all: _all,
+            any: _any,
+            latest: _latest,
+        };
+
+        if let Err(msg) = validate_evaluation_strategy_combonations(&evals) {
+            panic!("{:?}", msg);
+        }
+
+        evals
+    }
+}
+
+/// Validate that evaluation strategy combinations are compatible, otherwise return Err.
+pub(crate) fn validate_evaluation_strategy_combonations(
+    evals: &EvaluationStrategyData,
+) -> Result<(), &str> {
+    match (&evals.all, &evals.any) {
+        // Can't use both all and any.
+        (Some(_all), Some(_any)) => {
+            if *_all && *_any {
+                Err("Cannot use both all and any.")
+            } else {
+                Ok(())
+            }
+        }
+        _ => Ok(()),
+    }
+}
+
 // TODO: For tests expected to panic, maybe there's a more elegant way to catch the message to ensure it's the expected
 //       message. The failure shouldn't be recoverable since it's the implementation that should handle combinations.
 #[cfg(test)]
 mod tests {
     use super::*;
-    use clap::{arg, value_parser};
+    use clap::{arg, value_parser, ArgAction};
 
+    // TODO: Remove this restriction since it's okay to use both.
     #[test]
     #[should_panic]
     fn test_line_range_and_date_range() {
@@ -268,6 +331,35 @@ mod tests {
             None,
             matches.get_one::<usize>("head"),
             matches.get_one::<usize>("tail"),
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_all_and_any() {
+        let cmd = clap::Command::new("test")
+            .arg(
+                arg!(--all)
+                    .takes_value(false)
+                    .required(false)
+                    .action(ArgAction::SetTrue),
+            )
+            .arg(
+                arg!(--any)
+                    .takes_value(false)
+                    .required(false)
+                    .action(ArgAction::SetTrue),
+            );
+
+        let matches = cmd
+            .try_get_matches_from(["test", "--all", "--any"])
+            .unwrap();
+
+        // Can't use both date range and head.
+        let _ = EvaluationStrategyData::new(
+            matches.get_one::<bool>("all"),
+            matches.get_one::<bool>("any"),
+            None,
         );
     }
 }
