@@ -1,6 +1,6 @@
 use clap::parser::ValuesRef;
 
-// Range selection command group struct.
+/// Range selection command group struct.
 #[derive(Default)]
 pub struct RangeSelectionData {
     pub(crate) line_range: Option<Vec<usize>>,
