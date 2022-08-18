@@ -3,7 +3,6 @@ use clap::parser::ValuesRef;
 use std::{
     fs::File,
     io::{BufRead, BufReader},
-    vec,
 };
 
 /// Viewer struct used to perform view operations on file buffers.
@@ -55,6 +54,11 @@ impl Viewer {
         lines: &[(usize, String)],
         range: &Vec<usize>,
     ) -> Result<Vec<(usize, String)>, &str> {
+        // If there aren't any lines to filter correctly return with Ok.
+        if lines.is_empty() {
+            return Ok(lines.to_vec());
+        }
+
         // The range given is invalid if it has more than two values.
         // TODO: Should this be a panic?
         if range.len() > 2 {
@@ -142,14 +146,16 @@ impl Viewer {
         if let Some(ranges) = &self.ranges {
             // Filter head.
             if let Some(head) = &ranges.head {
-                let range = vec![0, head - 1];
-                lines = self.filter_with_line_range(&lines, &range)?;
+                if *head < lines.len() {
+                    lines = lines[..*head].to_vec();
+                }
             }
 
             // Filter tail.
             if let Some(tail) = &ranges.tail {
-                let range = vec![lines.len() - tail, lines.len() - 1];
-                lines = self.filter_with_line_range(&lines, &range)?;
+                if *tail < lines.len() {
+                    lines = lines[lines.len() - *tail..].to_vec();
+                }
             }
 
             // Filter specific line range.
@@ -166,11 +172,19 @@ impl Viewer {
         // Filter for latest N found in remaining lines.
         if let Some(evals) = &self.evals {
             if let Some(n) = evals.latest {
-                // TODO: Warning. Remove this after dates utilized.
-                println!("WARNING: File is expected to already be in sorted order.");
-                let range = vec![lines.len() - n - 1, lines.len() - 1];
-                lines = self.filter_with_line_range(&lines, &range)?;
+                if n < lines.len() {
+                    // TODO: Warning. Remove this after dates utilized.
+                    println!("WARNING: File is expected to already be in sorted order.");
+                    lines = lines[lines.len() - n..].to_vec();
+                }
             }
+        }
+
+        // Correctly return Ok if there isn't anything to show.
+        // TODO: Maybe return silently.
+        if lines.is_empty() {
+            println!("No lines to display.");
+            return Ok(());
         }
 
         // Display lines padding line numbers based on the amount of lines after any filtering.
