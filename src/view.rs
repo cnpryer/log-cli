@@ -197,7 +197,7 @@ impl Viewer {
 pub(crate) fn validate_viewer_combinations(viewer: &Viewer) -> Result<(), &str> {
     // Either all or any should be true.
     if let Some(evals) = &viewer.evals {
-        if let Err(msg) = command::validate_evaluation_strategy_combonations(evals) {
+        if let Err(msg) = command::validate_evaluation_strategy_combinations(evals) {
             return Err(msg);
         }
     }
