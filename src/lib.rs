@@ -175,11 +175,55 @@
 //!     -V, --version                  Print version information
 //! ```
 
+use std::path::PathBuf;
+
+use clap::ArgMatches;
+use command::{EvaluationStrategyData, RangeSelectionData};
+use read::read_file;
+use view::Viewer;
+
 /// Command implementations.
-pub mod command;
+mod command;
 /// Parsing implementations.
 pub mod parse;
 /// `File` reading logic for log files.
-pub mod read;
+mod read;
 /// Display implementations.
-pub mod view;
+mod view;
+
+/// `loc-cli` application struct.
+pub struct LogCLI {
+    viewer: view::Viewer,
+}
+
+impl LogCLI {
+    // TODO: ::with_clap
+    pub fn new(matches: &ArgMatches) -> LogCLI {
+        // Get optional argument values.
+        let keywords = matches.get_many::<String>("keywords");
+        let line_range = matches.get_many::<usize>("line-range");
+        let date_range = None; // TODO: matches.get_many::<String>("date-range");
+        let head = matches.get_one::<usize>("head");
+        let tail = matches.get_one::<usize>("tail");
+        let all = matches.get_one::<bool>("all");
+        let any = matches.get_one::<bool>("any");
+        let latest = matches.get_one::<usize>("latest");
+
+        // Read the file to a buffer and build a viewer for view operations.
+        let ranges = RangeSelectionData::new(line_range, date_range, head, tail);
+        let evals = EvaluationStrategyData::new(all, any, latest);
+        let viewer = Viewer::new(keywords, Some(ranges), Some(evals));
+
+        LogCLI { viewer }
+    }
+
+    pub fn run(&self, filepath: &PathBuf) -> Result<(), &str> {
+        // Create buffer to file lines.
+        let buffer = read_file(filepath).expect("File not found.");
+
+        // Display lines from the buffer, otherwise return the Err.
+        self.viewer.display_with(buffer)?;
+
+        Ok(())
+    }
+}

@@ -2,7 +2,7 @@ use clap::parser::ValuesRef;
 
 /// Range selection command group struct.
 #[derive(Default)]
-pub struct RangeSelectionData {
+pub(crate) struct RangeSelectionData {
     pub(crate) line_range: Option<Vec<usize>>,
     pub(crate) date_range: Option<Vec<String>>,
     pub(crate) head: Option<usize>,
@@ -10,7 +10,7 @@ pub struct RangeSelectionData {
 }
 
 impl RangeSelectionData {
-    pub fn new(
+    pub(crate) fn new(
         line_range: Option<ValuesRef<'_, usize>>,
         date_range: Option<ValuesRef<'_, String>>,
         head: Option<&usize>,
@@ -80,7 +80,7 @@ pub(crate) fn validate_range_selection_combinations(
 
 /// Evaluation data group struct.
 #[derive(Default)]
-pub struct EvaluationStrategyData {
+pub(crate) struct EvaluationStrategyData {
     pub(crate) all: Option<bool>,
     pub(crate) any: Option<bool>,
     #[allow(dead_code)]
@@ -88,7 +88,7 @@ pub struct EvaluationStrategyData {
 }
 
 impl EvaluationStrategyData {
-    pub fn new(
+    pub(crate) fn new(
         all: Option<&bool>,
         any: Option<&bool>,
         latest: Option<&usize>,

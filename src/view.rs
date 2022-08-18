@@ -7,14 +7,14 @@ use std::{
 
 /// Viewer struct used to perform view operations on file buffers.
 #[derive(Default)]
-pub struct Viewer {
+pub(crate) struct Viewer {
     keywords: Option<Vec<String>>,
     ranges: Option<RangeSelectionData>,
     evals: Option<EvaluationStrategyData>,
 }
 
 impl Viewer {
-    pub fn new(
+    pub(crate) fn new(
         keywords: Option<ValuesRef<'_, String>>,
         ranges: Option<RangeSelectionData>,
         evals: Option<EvaluationStrategyData>,
@@ -123,10 +123,8 @@ impl Viewer {
     }
 
     /// Display with viewer function to display the file via its `BufReader`.
-    // TODO:
-    //       - Validation and error handling.
-    //       - Use Enum eval.
-    pub fn display_with(&self, buffer: &mut BufReader<File>) -> Result<(), &str> {
+    // TODO: Use Enum eval.
+    pub(crate) fn display_with(&self, buffer: BufReader<File>) -> Result<(), &str> {
         // Collect enumerated lines.
         let mut lines: Vec<(usize, String)> = buffer.lines().flatten().enumerate().collect();
 
