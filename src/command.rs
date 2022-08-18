@@ -115,7 +115,7 @@ impl EvaluationStrategyData {
             latest: _latest,
         };
 
-        if let Err(msg) = validate_evaluation_strategy_combonations(&evals) {
+        if let Err(msg) = validate_evaluation_strategy_combinations(&evals) {
             panic!("{:?}", msg);
         }
 
@@ -124,7 +124,7 @@ impl EvaluationStrategyData {
 }
 
 /// Validate that evaluation strategy combinations are compatible, otherwise return Err.
-pub(crate) fn validate_evaluation_strategy_combonations(
+pub(crate) fn validate_evaluation_strategy_combinations(
     evals: &EvaluationStrategyData,
 ) -> Result<(), &str> {
     match (&evals.all, &evals.any) {
