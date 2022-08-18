@@ -7,7 +7,7 @@ use log_cli::{
 };
 use std::path::PathBuf;
 
-const VERSION: &str = "0.0.6";
+const VERSION: &str = "0.0.7";
 
 fn main() {
     // Create main clap command.
