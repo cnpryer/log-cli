@@ -81,7 +81,7 @@
 //! Pass `--head` to view the top 5 lines.
 //!
 //! ```console
-//! log-cli sample.log --head
+//! > log-cli sample.log --head
 //!
 //! ln0 2022-01-01 07:00:00,0 [info] module1  Message Subject: Text for a message.
 //! ln1 2022-01-01 08:00:00,0 [info] module1  Message Subject: Text for a message.
@@ -93,7 +93,7 @@
 //! By default `--head` and `--tail` will return 5 lines. Pass a number to override this value.
 //!
 //! ```console
-//! log-cli sample.log --tail 3
+//! > log-cli sample.log --tail 3
 //!
 //! ln21 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
 //! ln22 2022-01-02 05:00:00,0 [info] module7  Message Subject: Text for a message.
