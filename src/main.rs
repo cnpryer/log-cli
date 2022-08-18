@@ -1,4 +1,4 @@
-use clap::{arg, value_parser, App, ArgAction, Command};
+use clap::{arg, value_parser, App, ArgAction, ArgGroup, Command};
 use log_cli::{command::RangeSelectionData, parse, read::read_file, view::Viewer};
 use std::path::PathBuf;
 
@@ -98,6 +98,13 @@ fn cli() -> App<'static> {
             .required(false).value_parser(value_parser!(usize))
             .default_missing_value("1")
             .help("Set evaluation strategy to 'latest' VALUE lines.")
+        )
+        .group(ArgGroup::new("ranges")
+            .args(&["line-range", "tail", "head"])
+            .multiple(false))
+        .group(ArgGroup::new("primary-evaluations")
+            .args(&["any", "all"])
+            .multiple(false)
         );
 
     app
