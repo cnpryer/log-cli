@@ -85,7 +85,7 @@ fn main() {
         .expect("A valid path to a log file is required.");
 
     // Initialize the application.
-    // TODO: LogCLI::with_clip(&matches);
+    // TODO: LogCLI::with_clap(&matches);
     let app = LogCLI::new(&matches);
 
     // Attempt to display the contents otherwise print the error.

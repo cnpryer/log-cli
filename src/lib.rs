@@ -14,7 +14,7 @@
 //! To install `log-cli` run:
 //!
 //! ```console
-//! cargo install log-cli
+//! $ cargo install log-cli
 //! ```
 //!
 //! ## Basic usage
@@ -22,7 +22,7 @@
 //! View the entire log file.
 //!
 //! ```console
-//! > log-cli sample.log
+//! $ log-cli sample.log
 //!
 //! ln00 2022-01-01 07:00:00,0 [info] module1  Message Subject: Text for a message.
 //! ln01 2022-01-01 08:00:00,0 [info] module1  Message Subject: Text for a message.
@@ -55,7 +55,7 @@
 //! Pass keywords to filter for. By default `--keywords` will filter for lines where **all** keywords are found.
 //!
 //! ```console
-//! > log-cli sample.log --keywords "[debug]" module2
+//! $ log-cli sample.log --keywords "[debug]" module2
 //!
 //! ln2 2022-01-01 09:00:00,0 [debug] module2  Message Subject: Text for a message.
 //! ln3 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
@@ -68,7 +68,7 @@
 //! two values.
 //!
 //! ```console
-//! > log-cli sample.log --line-range 20 30
+//! $ log-cli sample.log --line-range 20 30
 //!
 //! ln20 2022-01-02 03:00:00,0 [debug] module12  Message Subject: Text for a message.
 //! ln21 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
@@ -81,7 +81,7 @@
 //! Pass `--head` to view the top 5 lines.
 //!
 //! ```console
-//! > log-cli sample.log --head
+//! $ log-cli sample.log --head
 //!
 //! ln0 2022-01-01 07:00:00,0 [info] module1  Message Subject: Text for a message.
 //! ln1 2022-01-01 08:00:00,0 [info] module1  Message Subject: Text for a message.
@@ -93,7 +93,7 @@
 //! By default `--head` and `--tail` will return 5 lines. Pass a number to override this value.
 //!
 //! ```console
-//! > log-cli sample.log --tail 3
+//! $ log-cli sample.log --tail 3
 //!
 //! ln21 2022-01-02 04:00:00,0 [warning] module11  Message Subject: Text for a message.
 //! ln22 2022-01-02 05:00:00,0 [info] module7  Message Subject: Text for a message.
@@ -109,7 +109,7 @@
 //! Evaluation strategies can be used to configure viewing and filtering behaviors.
 //!
 //! ```console
-//! > log-cli sample.log --keywords "[debug]" "[info]" --any
+//! $ log-cli sample.log --keywords "[debug]" "[info]" --any
 //!
 //! ln00 2022-01-01 07:00:00,0 [info] module1  Message Subject: Text for a message.
 //! ln01 2022-01-01 08:00:00,0 [info] module1  Message Subject: Text for a message.
@@ -138,7 +138,7 @@
 //! In addition to the `--any` and `--all` evaluation strategies, pass `--latest` to filter for the latest results.
 //!
 //! ```console
-//! > log-cli sample.log --keywords "[debug]" "[info]" --any --latest 3
+//! $ log-cli sample.log --keywords "[debug]" "[info]" --any --latest 3
 //!
 //! ln18 2022-01-02 01:00:00,0 [info] module10  Message Subject: Text for a message.
 //! ln19 2022-01-02 02:00:00,0 [info] module1  Message Subject: Text for a message.
@@ -150,7 +150,7 @@
 //! ## Help
 //!
 //! ```console
-//! > log-cli --help
+//! $ log-cli --help
 //!
 //! Command line interface for log files.
 //!
