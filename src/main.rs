@@ -2,7 +2,7 @@ use clap::{arg, value_parser, ArgAction, ArgGroup, Command};
 use log_cli::{parse, LogCLI};
 use std::path::PathBuf;
 
-const VERSION: &str = "0.0.7";
+const VERSION: &str = "0.0.8";
 
 fn main() {
     // Create main clap command.
