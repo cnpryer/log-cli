@@ -181,7 +181,7 @@ impl Viewer {
         if let Some(n) = &self.latest {
             // TODO: Warning. Remove this after dates utilized.
             println!("WARNING: File is expected to already be in sorted order.");
-            let range = vec![lines.len() - n, lines.len() - 1];
+            let range = vec![lines.len() - n - 1, lines.len() - 1];
             lines = self.filter_with_line_range(&lines, &range)?;
         }
 
