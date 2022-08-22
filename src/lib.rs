@@ -193,7 +193,7 @@ mod view;
 
 /// `loc-cli` application struct.
 pub struct LogCLI {
-    viewer: view::Viewer,
+    viewer: Viewer,
 }
 
 impl LogCLI {
