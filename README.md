@@ -10,15 +10,15 @@ Command line interface for log files.
 To install `log-cli` run:
 
 ```console
-cargo install log-cli
+$ cargo install log-cli
 ```
 
 ## Usage
 
 `log-cli` can be used to interact with log files from the command line.
 
-```
-log-cli <log file> arguments...
+```console
+$ log-cli <log file> arguments...
 ```
 
 For more see [the docs](https://docs.rs/log-cli) or run `log-cli --help`.
