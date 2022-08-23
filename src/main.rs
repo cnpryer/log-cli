@@ -82,7 +82,7 @@ fn main() {
     // Path to log file to read.
     let filepath = matches
         .get_one::<PathBuf>("LOG_FILE")
-        .expect("A valid path to a log file is required.");
+        .expect("a valid path to a log file is required");
 
     // Initialize the application.
     let app = LogCLI::from_clap(&matches);

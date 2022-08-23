@@ -23,5 +23,6 @@ name = "log-cli"
 path = "src/main.rs" # This should be the default.
 
 [dependencies]
+anyhow = "1.0.62"
 chrono = "^0.4.22"
 clap = "^3.2.17"

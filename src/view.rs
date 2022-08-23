@@ -1,4 +1,5 @@
 use crate::command::{self, EvaluationStrategyData, RangeSelectionData};
+use anyhow::{anyhow, Result};
 use clap::parser::ValuesRef;
 use std::{
     fs::File,
@@ -53,7 +54,7 @@ impl Viewer {
         &self,
         lines: &[(usize, String)],
         range: &Vec<usize>,
-    ) -> Result<Vec<(usize, String)>, &str> {
+    ) -> Result<Vec<(usize, String)>> {
         // If there aren't any lines to filter correctly return with Ok.
         if lines.is_empty() {
             return Ok(lines.to_vec());
@@ -62,7 +63,7 @@ impl Viewer {
         // The range given is invalid if it has more than two values.
         // TODO: Should this be a panic?
         if range.len() > 2 {
-            return Err("The range provided has more than two elements.");
+            return Err(anyhow!("the range provided has more than two elements"));
         }
 
         let res = lines
@@ -94,7 +95,7 @@ impl Viewer {
         lines: &[(usize, String)],
         keywords: &[String],
         eval: &str, // TODO: Use clap-recognizable enum
-    ) -> Result<Vec<(usize, String)>, &str> {
+    ) -> Result<Vec<(usize, String)>> {
         // Filter lines for lines that contain any of the keywords indicated by caller.
         let res = lines
             .iter()
@@ -107,13 +108,7 @@ impl Viewer {
     }
 
     /// Display the entire file padding the line numbers using `ln_pad`.
-    fn display_lines(&self, lines: &[(usize, String)], ln_pad: usize) -> Result<(), &str> {
-        // If no lines are collected correctly display nothing.
-        // TODO: Maybe panic.
-        if lines.is_empty() {
-            return Ok(());
-        }
-
+    fn display_lines(&self, lines: &[(usize, String)], ln_pad: usize) -> Result<()> {
         // Display each line numbered with padding based on the number of lines collected.
         for (i, line) in lines {
             println!("ln{:0width$} {}", i, line, width = ln_pad);
@@ -124,7 +119,7 @@ impl Viewer {
 
     /// Display with viewer function to display the file via its `BufReader`.
     // TODO: Use Enum eval.
-    pub(crate) fn display_with(&self, buffer: BufReader<File>) -> Result<(), &str> {
+    pub(crate) fn display_with(&self, buffer: BufReader<File>) -> Result<()> {
         // Collect enumerated lines.
         let mut lines: Vec<(usize, String)> = buffer.lines().flatten().enumerate().collect();
 
@@ -172,16 +167,14 @@ impl Viewer {
             if let Some(n) = evals.latest {
                 if n < lines.len() {
                     // TODO: Warning. Remove this after dates utilized.
-                    println!("Warning: File is expected to already be in sorted order.");
+                    println!("warning: file is expected to already be in sorted order");
                     lines = lines[lines.len() - n..].to_vec();
                 }
             }
         }
 
         // Correctly return Ok if there isn't anything to show.
-        // TODO: Maybe return silently.
         if lines.is_empty() {
-            println!("No lines to display.");
             return Ok(());
         }
 
@@ -192,7 +185,7 @@ impl Viewer {
 }
 
 /// Validate viewer setup.
-pub(crate) fn validate_viewer_combinations(viewer: &Viewer) -> Result<(), &str> {
+pub(crate) fn validate_viewer_combinations(viewer: &Viewer) -> Result<()> {
     // Either all or any should be true.
     if let Some(evals) = &viewer.evals {
         if let Err(msg) = command::validate_evaluation_strategy_combinations(evals) {
