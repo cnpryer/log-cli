@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Result};
 use clap::parser::ValuesRef;
 
 /// Range selection command group struct.
@@ -53,9 +54,7 @@ impl RangeSelectionData {
 }
 
 /// Validate that range selection combinations are compatible, otherwise return Err.
-pub(crate) fn validate_range_selection_combinations(
-    ranges: &RangeSelectionData,
-) -> Result<(), &str> {
+pub(crate) fn validate_range_selection_combinations(ranges: &RangeSelectionData) -> Result<()> {
     match (
         &ranges.line_range,
         &ranges.date_range,
@@ -63,17 +62,17 @@ pub(crate) fn validate_range_selection_combinations(
         &ranges.tail,
     ) {
         // Can't use both line range and date range.
-        (Some(_), Some(_), None, None) => Err("Cannot use both line range and date range."),
+        (Some(_), Some(_), None, None) => Err(anyhow!("cannot use both line range and date range")),
         // Can't use both line range and head.
-        (Some(_), None, Some(_), None) => Err("Cannot use both line range and head."),
+        (Some(_), None, Some(_), None) => Err(anyhow!("cannot use both line range and head")),
         // Can't use both date range and head.
-        (None, Some(_), Some(_), None) => Err("Cannot use both date range and head."),
+        (None, Some(_), Some(_), None) => Err(anyhow!("cannot use both date range and head")),
         // Can't use both line range and tail.
-        (Some(_), None, None, Some(_)) => Err("Cannot use both line range and tail."),
+        (Some(_), None, None, Some(_)) => Err(anyhow!("cannot use both line range and tail")),
         // Can't use both date range and tail
-        (None, Some(_), None, Some(_)) => Err("Cannot use both date range and tail."),
+        (None, Some(_), None, Some(_)) => Err(anyhow!("cannot use both date range and tail")),
         // Can't use both head and tail.
-        (None, None, Some(_), Some(_)) => Err("Cannot use both head and tail."),
+        (None, None, Some(_), Some(_)) => Err(anyhow!("cannot use both head and tail")),
         _ => Ok(()),
     }
 }
@@ -83,7 +82,6 @@ pub(crate) fn validate_range_selection_combinations(
 pub(crate) struct EvaluationStrategyData {
     pub(crate) all: Option<bool>,
     pub(crate) any: Option<bool>,
-    #[allow(dead_code)]
     pub(crate) latest: Option<usize>,
 }
 
@@ -126,12 +124,12 @@ impl EvaluationStrategyData {
 /// Validate that evaluation strategy combinations are compatible, otherwise return Err.
 pub(crate) fn validate_evaluation_strategy_combinations(
     evals: &EvaluationStrategyData,
-) -> Result<(), &str> {
+) -> Result<()> {
     match (&evals.all, &evals.any) {
         // Can't use both all and any.
         (Some(_all), Some(_any)) => {
             if *_all && *_any {
-                Err("Cannot use both all and any.")
+                Err(anyhow!("cannot use both all and any"))
             } else {
                 Ok(())
             }
@@ -140,8 +138,8 @@ pub(crate) fn validate_evaluation_strategy_combinations(
     }
 }
 
-// TODO: For tests expected to panic, maybe there's a more elegant way to catch the message to ensure it's the expected
-//       message. The failure shouldn't be recoverable since it's the implementation that should handle combinations.
+// TODO: For tests expected to panic, use custom error enums to bind to the message to ensure it's the expected error
+//       kind. The failure shouldn't be recoverable since it's the implementation that should handle combinations.
 #[cfg(test)]
 mod tests {
     use super::*;

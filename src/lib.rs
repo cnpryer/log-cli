@@ -175,11 +175,11 @@
 //!     -V, --version                  Print version information
 //! ```
 
-use std::path::PathBuf;
-
+use anyhow::Result;
 use clap::ArgMatches;
 use command::{EvaluationStrategyData, RangeSelectionData};
 use read::read_file;
+use std::path::PathBuf;
 use view::Viewer;
 
 /// Command implementations.
@@ -218,7 +218,7 @@ impl LogCLI {
     }
 
     /// Run parsed commands using a target `filepath`.
-    pub fn run_with_filepath(&self, filepath: &PathBuf) -> Result<(), &str> {
+    pub fn run_with_filepath(&self, filepath: &PathBuf) -> Result<()> {
         // Create buffer to file lines.
         let buffer = read_file(filepath).expect("File not found.");
 
