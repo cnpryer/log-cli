@@ -197,8 +197,8 @@ pub struct LogCLI {
 }
 
 impl LogCLI {
-    // TODO: ::with_clap
-    pub fn new(matches: &ArgMatches) -> LogCLI {
+    /// Initialize `LogCLI` instance using `clap`'s `ArgMatches`.
+    pub fn from_clap(matches: &ArgMatches) -> LogCLI {
         // Get optional argument values.
         let keywords = matches.get_many::<String>("keywords");
         let line_range = matches.get_many::<usize>("line-range");
@@ -217,7 +217,8 @@ impl LogCLI {
         LogCLI { viewer }
     }
 
-    pub fn run(&self, filepath: &PathBuf) -> Result<(), &str> {
+    /// Run parsed commands using a target `filepath`.
+    pub fn run_with_filepath(&self, filepath: &PathBuf) -> Result<(), &str> {
         // Create buffer to file lines.
         let buffer = read_file(filepath).expect("File not found.");
 
