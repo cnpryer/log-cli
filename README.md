@@ -5,25 +5,8 @@
 
 Command line interface for log files.
 
-## Installation
-
-To install `log-cli` run:
-
-```console
-$ cargo install log-cli
-```
-
-## Usage
-
-`log-cli` can be used to interact with log files from the command line.
-
-```console
-$ log-cli <log file> arguments...
-```
-
-log-cli: <small>Command line interface for log files.</small>
-
 ## Contents
+
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
   - [Keywords](#view-using-keywords)
