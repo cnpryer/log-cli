@@ -5,30 +5,13 @@
 
 Command line interface for log files.
 
-## Installation
-
-To install `log-cli` run:
-
-```console
-$ cargo install log-cli
-```
-
-## Usage
-
-`log-cli` can be used to interact with log files from the command line.
-
-```console
-$ log-cli <log file> arguments...
-```
-
-log-cli: <small>Command line interface for log files.</small>
-
 ## Contents
+
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
-  - [Keywords](#view-using-keywords)
-  - [Line Range](#view-using-a-line-range)
-  - [Head and Tail](#view-head-and-tail)
+  - [Keywords](#query-using-keywords)
+  - [Line Range](#query-using-a-line-range)
+  - [Head and Tail](#query-head-and-tail)
 - [Advanced Usage](#more-advanced-usage)
   - [Keywords and Evaluation Strategies](#keywords-and-evaluation-strategies)
 
@@ -42,7 +25,7 @@ $ cargo install log-cli
 
 ## Basic usage
 
-View the entire log file.
+Query the entire log file.
 
 ```console
 $ log-cli sample.log
@@ -74,7 +57,7 @@ ln22 2022-01-02 05:00:00,0 [info] module7  Message Subject: Text for a message.
 ln23 2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
 ```
 
-### View using keywords
+### Query using keywords
 
 Pass keywords to filter for. By default `--keywords` will filter for lines where **all** keywords are found.
 
@@ -87,9 +70,9 @@ ln3 2022-01-01 10:00:00,0 [debug] module2  Message Subject: Text for a message.
 ln4 2022-01-01 11:00:00,0 [debug] module2  Message Subject: Text for a message.
 ```
 
-### View using a line range
+### Query using a line range
 
-Pass a line range. Ranges can be one to many lines. To view just the first line pass 0. To view a range of many lines pass
+Pass a line range. Ranges can be one to many lines. To query just the first line pass 0. To query a range of many lines pass
 two values.
 
 ```console
@@ -102,9 +85,9 @@ ln22 2022-01-02 05:00:00,0 [info] module7  Message Subject: Text for a message.
 ln23 2022-01-02 06:00:00,0 [info] module6  Message Subject: Text for a message.
 ```
 
-### View head and tail
+### Query head and tail
 
-Pass `--head` to view the top 5 lines.
+Pass `--head` to query the top 5 lines.
 
 ```console
 $ log-cli sample.log --head
@@ -134,7 +117,7 @@ Arguments can be combined for more complex use cases.
 
 ### Keywords and evaluation strategies
 
-Evaluation strategies can be used to configure viewing and filtering behaviors.
+Evaluation strategies can be used to configure query behaviors.
 
 ```console
 $ log-cli sample.log --keywords "[debug]" "[info]" --any
