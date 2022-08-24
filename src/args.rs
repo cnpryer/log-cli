@@ -1,8 +1,6 @@
 use std::path::PathBuf;
 
-use crate::app;
-use crate::query;
-use crate::Result;
+use crate::{app, query, Result};
 
 /// Possible root arguments available to the user.
 pub(crate) enum Root {
