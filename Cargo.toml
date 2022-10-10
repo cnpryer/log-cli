@@ -22,4 +22,4 @@ path = "src/main.rs" # This should be the default.
 
 [dependencies]
 chrono = "0.4.22"
-clap = {version = "3.2.22", default_features = false, features = ["std", "cargo"]}
+clap = {version = "4.0.11", default_features = false, features = ["std", "cargo"]}
